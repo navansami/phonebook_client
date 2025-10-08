@@ -9,7 +9,6 @@ import AdminLayout from './layouts/AdminLayout'
 import HomePage from './pages/HomePage'
 import AdminDashboard from './pages/AdminDashboard'
 import Login from './pages/Login'
-import Debug from './pages/Debug'
 import ProtectedRoute from './components/ProtectedRoute'
 
 const queryClient = new QueryClient({
@@ -37,9 +36,6 @@ function App() {
 
                 {/* Auth Routes */}
                 <Route path="/login" element={<Login />} />
-
-                {/* Debug Route */}
-                <Route path="/debug" element={<Debug />} />
 
                 {/* Admin Routes */}
                 <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
