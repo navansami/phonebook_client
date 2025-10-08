@@ -307,11 +307,9 @@ const HomePage = () => {
   };
 
   const handleEditContact = (contact) => {
-    if (isAuthenticated) {
-      // Open the detail modal which will have edit functionality
-      setSelectedContact(contact);
-      setIsDetailModalOpen(true);
-    }
+    // Open the detail modal which will have edit functionality
+    setSelectedContact(contact);
+    setIsDetailModalOpen(true);
   };
 
   const handleSortChange = (e) => {
@@ -498,7 +496,7 @@ const HomePage = () => {
                     key={contact._id || contact.id}
                     contact={contact}
                     onOpenDetail={handleOpenDetail}
-                    onEdit={isAuthenticated ? handleEditContact : null}
+                    onEdit={handleEditContact}
                   />
                 ))}
               </div>

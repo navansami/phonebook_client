@@ -52,7 +52,7 @@ const ContactCard = ({ contact, onOpenDetail, onEdit }) => {
               }`}
             />
           </button>
-          {isAuthenticated && onEdit && (
+          {onEdit && (
             <button
               onClick={(e) => {
                 e.stopPropagation();

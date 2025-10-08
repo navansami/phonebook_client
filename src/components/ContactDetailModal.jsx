@@ -252,7 +252,7 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
                   />
                 </button>
               )}
-              {isAuthenticated && !isEditing && (
+              {!isEditing && (
                 <button
                   onClick={() => setIsEditing(true)}
                   className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-semibold"
