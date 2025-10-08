@@ -19,12 +19,31 @@ export const getContact = (id) => {
 };
 
 /**
- * Create a new contact (admin only)
+ * Create a new contact (public endpoint)
  * @param {Object} data - Contact data
  * @returns {Promise} Axios response promise
  */
 export const createContact = (data) => {
+  return api.post('/api/contacts', data);
+};
+
+/**
+ * Create a new contact (admin only)
+ * @param {Object} data - Contact data
+ * @returns {Promise} Axios response promise
+ */
+export const createContactAdmin = (data) => {
   return api.post('/api/admin/contacts', data);
+};
+
+/**
+ * Update an existing contact (public endpoint)
+ * @param {string} id - Contact ID
+ * @param {Object} data - Updated contact data
+ * @returns {Promise} Axios response promise
+ */
+export const updateContact = (id, data) => {
+  return api.put(`/api/contacts/${id}`, data);
 };
 
 /**
@@ -33,7 +52,7 @@ export const createContact = (data) => {
  * @param {Object} data - Updated contact data
  * @returns {Promise} Axios response promise
  */
-export const updateContact = (id, data) => {
+export const updateContactAdmin = (id, data) => {
   return api.put(`/api/admin/contacts/${id}`, data);
 };
 

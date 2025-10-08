@@ -4,8 +4,7 @@ import { ArrowUpDown, Plus, HelpCircle } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { useAuth } from '../contexts/AuthContext';
-import { getContacts, getTags, getLanguages } from '../services/contactsApi';
-import { sendNewContactEmail } from '../services/emailService';
+import { getContacts, getTags, getLanguages, createContact } from '../services/contactsApi';
 import toast from 'react-hot-toast';
 
 // Components
@@ -297,11 +296,13 @@ const HomePage = () => {
 
   const handleFormSubmit = async (formData) => {
     try {
-      await sendNewContactEmail(formData);
-      toast.success('Contact suggestion sent successfully!');
+      await createContact(formData);
+      toast.success('Contact added successfully!');
+      // Refetch contacts to show the new contact
+      refetchContacts();
       handleCloseForm();
     } catch (error) {
-      toast.error('Failed to send suggestion. Please try again.');
+      toast.error(error.response?.data?.detail || 'Failed to add contact. Please try again.');
       throw error;
     }
   };

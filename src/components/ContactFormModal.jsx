@@ -7,9 +7,12 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
     name: '',
     designation: '',
     department: '',
+    company: '',
     email: '',
     mobile: '',
     landline: '',
+    extension: '',
+    website: '',
     comments: ''
   });
   const [languages, setLanguages] = useState([]);
@@ -25,9 +28,12 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
         name: contact.name || '',
         designation: contact.designation || '',
         department: contact.department || '',
+        company: contact.company || '',
         email: contact.email || '',
         mobile: contact.mobile || '',
         landline: contact.landline || '',
+        extension: contact.extension || '',
+        website: contact.website || '',
         comments: contact.comments || ''
       });
       setLanguages(contact.languages || []);
@@ -37,9 +43,12 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
         name: '',
         designation: '',
         department: '',
+        company: '',
         email: '',
         mobile: '',
         landline: '',
+        extension: '',
+        website: '',
         comments: ''
       });
       setLanguages([]);
@@ -195,7 +204,7 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
             {/* Info Banner */}
             <div className="bg-indigo-50 border-l-4 border-indigo-600 rounded-lg p-4">
               <p className="text-sm text-indigo-800">
-                <span className="font-semibold">Note:</span> Please note the below contact will be added to the global phone book.
+                <span className="font-semibold">Note:</span> This contact will be added directly to the global phone book and will be visible to all users immediately.
               </p>
             </div>
 
@@ -256,6 +265,23 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
                   disabled={isLoading}
                 />
               </div>
+            </div>
+
+            {/* Company */}
+            <div>
+              <label htmlFor="company" className="block text-sm font-semibold text-gray-700 mb-2">
+                Company
+              </label>
+              <input
+                type="text"
+                id="company"
+                name="company"
+                value={formData.company}
+                onChange={handleChange}
+                placeholder="Fairmont The Palm"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                disabled={isLoading}
+              />
             </div>
 
             {/* Email */}
@@ -325,6 +351,40 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
                   <span>⚠️</span> {errors.landline}
                 </p>}
               </div>
+            </div>
+
+            {/* Extension */}
+            <div>
+              <label htmlFor="extension" className="block text-sm font-semibold text-gray-700 mb-2">
+                Extension
+              </label>
+              <input
+                type="text"
+                id="extension"
+                name="extension"
+                value={formData.extension}
+                onChange={handleChange}
+                placeholder="3301"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                disabled={isLoading}
+              />
+            </div>
+
+            {/* Website */}
+            <div>
+              <label htmlFor="website" className="block text-sm font-semibold text-gray-700 mb-2">
+                Website
+              </label>
+              <input
+                type="url"
+                id="website"
+                name="website"
+                value={formData.website}
+                onChange={handleChange}
+                placeholder="https://example.com"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                disabled={isLoading}
+              />
             </div>
 
             {/* Languages */}
