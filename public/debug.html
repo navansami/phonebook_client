@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Info</title>
+</head>
+<body>
+    <h1>Environment Debug</h1>
+    <pre id="debug"></pre>
+    <script type="module">
+        const debugInfo = {
+            VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
+            MODE: import.meta.env.MODE,
+            DEV: import.meta.env.DEV,
+            PROD: import.meta.env.PROD,
+            ALL_ENV: import.meta.env
+        };
+        document.getElementById('debug').textContent = JSON.stringify(debugInfo, null, 2);
+    </script>
+</body>
+</html>
