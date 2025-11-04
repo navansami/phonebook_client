@@ -139,8 +139,9 @@ const HomePage = () => {
     queryFn: async () => {
       const params = {
         page: 1,
-        limit: 1000, // Fetch all contacts (you have 183)
+        limit: 500, // Reasonable limit for performance
         sortBy: 'name',
+        include_pictures: true, // Include Cloudinary URLs (small, fast)
       };
 
       const response = await getContacts(params);

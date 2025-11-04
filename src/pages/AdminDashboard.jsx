@@ -56,7 +56,11 @@ const AdminDashboard = () => {
   } = useQuery({
     queryKey: ['admin-contacts'],
     queryFn: async () => {
-      const response = await contactsApi.getContacts({ page: 1, limit: 1000 });
+      const response = await contactsApi.getContacts({
+        page: 1,
+        limit: 500,
+        include_pictures: true  // Include profile pictures for admin
+      });
       return response.data;
     },
     onError: (err) => {

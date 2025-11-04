@@ -120,3 +120,20 @@ export const getTags = () => {
 export const getLanguages = () => {
   return api.get('/api/languages');
 };
+
+/**
+ * Upload a profile picture to Cloudinary (admin only)
+ * @param {string} contactId - Contact ID
+ * @param {File|Blob} file - Image file to upload
+ * @returns {Promise} Axios response promise
+ */
+export const uploadProfilePicture = (contactId, file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return api.post(`/api/upload/profile-picture?contact_id=${contactId}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};

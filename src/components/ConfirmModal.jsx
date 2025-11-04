@@ -29,12 +29,6 @@ const ConfirmModal = ({
 
   if (!isOpen) return null;
 
-  const handleBackdropClick = (e) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
   const handleConfirm = () => {
     onConfirm();
     onClose();
@@ -43,7 +37,6 @@ const ConfirmModal = ({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn"
-      onClick={handleBackdropClick}
     >
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
         {/* Header */}

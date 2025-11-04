@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Loader2, User, Upload, ImageIcon, XCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ImageCropModal from './ImageCropModal';
+import { uploadProfilePicture } from '../services/contactsApi';
 
 const AdminContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
   const [formData, setFormData] = useState({
@@ -90,12 +91,6 @@ const AdminContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
 
   if (!isOpen) return null;
 
-  const handleBackdropClick = (e) => {
-    if (e.target === e.currentTarget && !isLoading) {
-      onClose();
-    }
-  };
-
   const validateForm = () => {
     const newErrors = {};
 
@@ -130,9 +125,28 @@ const AdminContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
     }
   };
 
-  const handleCropComplete = (croppedImage) => {
-    setFormData(prev => ({ ...prev, profile_picture: croppedImage }));
-    toast.success('Profile picture added successfully');
+  const handleCropComplete = async (croppedImageBlob) => {
+    // Show loading toast
+    const loadingToast = toast.loading('Uploading profile picture...');
+
+    try {
+      // Generate a temporary contact ID if creating a new contact
+      const contactId = contact?.id || `temp_${Date.now()}`;
+
+      // Upload to Cloudinary via backend
+      const response = await uploadProfilePicture(contactId, croppedImageBlob);
+
+      // Set the Cloudinary URL in form data
+      setFormData(prev => ({ ...prev, profile_picture: response.data.url }));
+
+      toast.success('Profile picture uploaded successfully', { id: loadingToast });
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error(
+        error.response?.data?.detail || 'Failed to upload profile picture',
+        { id: loadingToast }
+      );
+    }
   };
 
   const handleRemoveProfilePicture = () => {
@@ -174,7 +188,6 @@ const AdminContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
     <>
       <div
         className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn"
-        onClick={handleBackdropClick}
       >
         <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
           {/* Header */}

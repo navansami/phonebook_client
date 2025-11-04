@@ -71,14 +71,23 @@ const ImageCropModal = ({ isOpen, onClose, onCropComplete, initialImage }) => {
       crop.height * scaleY
     );
 
-    return canvas.toDataURL('image/jpeg', 0.9);
+    return canvas;
   }, [completedCrop]);
 
   const handleCropComplete = () => {
-    const croppedImageUrl = generateCroppedImage();
-    if (croppedImageUrl) {
-      onCropComplete(croppedImageUrl);
-      onClose();
+    const canvas = generateCroppedImage();
+    if (canvas) {
+      // Convert canvas to Blob instead of base64
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            onCropComplete(blob);
+            onClose();
+          }
+        },
+        'image/jpeg',
+        0.9
+      );
     }
   };
 
@@ -97,7 +106,7 @@ const ImageCropModal = ({ isOpen, onClose, onCropComplete, initialImage }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn" onMouseDown={(e) => e.stopPropagation()}>
       <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 flex items-center justify-between text-white">
