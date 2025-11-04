@@ -307,34 +307,34 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
             {/* Left Column - Profile and Main Info (2/3 width) */}
             <div className="lg:col-span-2 space-y-6">
               {/* Profile Picture Section */}
-              <div className="flex items-center gap-6 bg-gradient-to-br from-purple-50 via-white to-violet-50 p-6 rounded-2xl border-2 border-purple-200 shadow-lg">
+              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 bg-gradient-to-br from-purple-50 via-white to-violet-50 p-4 sm:p-6 rounded-2xl border-2 border-purple-200 shadow-lg">
                 <div className="relative flex-shrink-0">
-                  <div className="w-48 h-48 rounded-2xl bg-gradient-to-br from-purple-400 via-violet-400 to-fuchsia-400 p-1 shadow-xl">
+                  <div className="w-32 h-32 sm:w-48 sm:h-48 rounded-2xl bg-gradient-to-br from-purple-400 via-violet-400 to-fuchsia-400 p-1 shadow-xl">
                     <div className="w-full h-full rounded-xl bg-white flex items-center justify-center overflow-hidden">
                       {profileImage ? (
                         <img src={profileImage} alt={editedContact.name} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-purple-100 to-violet-100 flex items-center justify-center">
-                          <User className="w-24 h-24 text-purple-400" />
+                          <User className="w-16 h-16 sm:w-24 sm:h-24 text-purple-400" />
                         </div>
                       )}
                     </div>
                   </div>
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 w-full text-center sm:text-left">
                   {isEditing ? (
                     <input
                       type="text"
                       value={editedContact.name || ''}
                       onChange={(e) => handleInputChange('name', e.target.value)}
-                      className="text-2xl font-bold text-gray-900 border-b-2 border-purple-300 focus:border-purple-600 outline-none bg-transparent w-full py-2"
+                      className="text-xl sm:text-2xl font-bold text-gray-900 border-b-2 border-purple-300 focus:border-purple-600 outline-none bg-transparent w-full py-2"
                       placeholder="Contact Name"
                     />
                   ) : (
-                    <h3 className="text-2xl font-bold text-gray-900">{contact.name}</h3>
+                    <h3 className="text-xl sm:text-2xl font-bold text-gray-900">{contact.name}</h3>
                   )}
                   {!isEditing && contact.designation && (
-                    <p className="text-purple-600 font-semibold mt-1">{contact.designation}</p>
+                    <p className="text-purple-600 font-semibold text-base sm:text-lg mt-1">{contact.designation}</p>
                   )}
                   {!isEditing && contact.department && (
                     <p className="text-gray-500 text-sm mt-1">📍 {contact.department}</p>

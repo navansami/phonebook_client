@@ -6,7 +6,17 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
 
   const getPageNumbers = () => {
     const pages = [];
-    const maxVisible = 7; // Maximum number of page buttons to show
+    // Responsive: show fewer pages on mobile
+    const isMobile = window.innerWidth < 640; // Tailwind 'sm' breakpoint
+
+    // On mobile, only show current page
+    if (isMobile) {
+      pages.push(currentPage);
+      return pages;
+    }
+
+    // Desktop: show up to 7 pages
+    const maxVisible = 7;
 
     if (totalPages <= maxVisible) {
       // Show all pages if total is less than max
@@ -85,13 +95,13 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   const pageNumbers = getPageNumbers();
 
   return (
-    <div className="flex items-center justify-center gap-2 py-3">
-      {/* First page button */}
+    <div className="flex items-center justify-center gap-0.5 sm:gap-2 py-3 px-1 sm:px-2">
+      {/* First page button - Hidden on mobile */}
       <button
         onClick={handleFirst}
         disabled={currentPage === 1}
         className={`
-          p-1.5 rounded-lg transition-all duration-200 border-2
+          hidden sm:block p-1.5 rounded-lg transition-all duration-200 border-2
           ${currentPage === 1
             ? 'text-gray-300 border-gray-200 cursor-not-allowed bg-gray-50'
             : 'text-purple-600 border-purple-200 hover:bg-purple-50 hover:border-purple-400 hover:shadow-md active:scale-95'
@@ -108,7 +118,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         onClick={handlePrevious}
         disabled={currentPage === 1}
         className={`
-          p-1.5 rounded-lg transition-all duration-200 border-2
+          p-0.5 sm:p-1.5 rounded transition-all duration-200 border-2
           ${currentPage === 1
             ? 'text-gray-300 border-gray-200 cursor-not-allowed bg-gray-50'
             : 'text-purple-600 border-purple-200 hover:bg-purple-50 hover:border-purple-400 hover:shadow-md active:scale-95'
@@ -117,17 +127,17 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         aria-label="Previous page"
         title="Previous page"
       >
-        <ChevronLeft size={18} />
+        <ChevronLeft size={14} className="sm:w-[18px] sm:h-[18px]" />
       </button>
 
       {/* Page numbers */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-0.5 sm:gap-1">
         {pageNumbers.map((page, index) => {
           if (typeof page === 'string' && page.includes('ellipsis')) {
             return (
               <span
                 key={page}
-                className="px-3 py-2 text-purple-400 text-base font-medium select-none"
+                className="px-1 sm:px-3 py-2 text-purple-400 text-sm sm:text-base font-medium select-none"
               >
                 •••
               </span>
@@ -141,7 +151,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
               key={page}
               onClick={() => handlePageClick(page)}
               className={`
-                min-w-[38px] h-[38px] px-2.5 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 border-2
+                min-w-[28px] sm:min-w-[38px] h-[28px] sm:h-[38px] px-1 sm:px-2.5 py-0.5 sm:py-1.5 rounded text-xs sm:text-sm font-semibold transition-all duration-200 border-2
                 ${isActive
                   ? 'bg-gradient-to-br from-purple-500 to-violet-500 text-white border-purple-600 shadow-lg shadow-purple-200 scale-105'
                   : 'text-purple-700 border-purple-200 bg-white hover:bg-purple-50 hover:border-purple-400 hover:shadow-md hover:scale-105 active:scale-95'
@@ -161,7 +171,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         onClick={handleNext}
         disabled={currentPage === totalPages}
         className={`
-          p-1.5 rounded-lg transition-all duration-200 border-2
+          p-0.5 sm:p-1.5 rounded transition-all duration-200 border-2
           ${currentPage === totalPages
             ? 'text-gray-300 border-gray-200 cursor-not-allowed bg-gray-50'
             : 'text-purple-600 border-purple-200 hover:bg-purple-50 hover:border-purple-400 hover:shadow-md active:scale-95'
@@ -170,15 +180,15 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         aria-label="Next page"
         title="Next page"
       >
-        <ChevronRight size={18} />
+        <ChevronRight size={14} className="sm:w-[18px] sm:h-[18px]" />
       </button>
 
-      {/* Last page button */}
+      {/* Last page button - Hidden on mobile */}
       <button
         onClick={handleLast}
         disabled={currentPage === totalPages}
         className={`
-          p-1.5 rounded-lg transition-all duration-200 border-2
+          hidden sm:block p-1.5 rounded-lg transition-all duration-200 border-2
           ${currentPage === totalPages
             ? 'text-gray-300 border-gray-200 cursor-not-allowed bg-gray-50'
             : 'text-purple-600 border-purple-200 hover:bg-purple-50 hover:border-purple-400 hover:shadow-md active:scale-95'
@@ -191,9 +201,9 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
       </button>
 
       {/* Page indicator text */}
-      <div className="ml-3 px-3 py-1.5 bg-purple-50 border-2 border-purple-200 rounded-lg">
-        <span className="text-xs font-semibold text-purple-700">
-          Page <span className="text-purple-900">{currentPage}</span> of <span className="text-purple-900">{totalPages}</span>
+      <div className="ml-0.5 sm:ml-3 px-1.5 sm:px-3 py-0.5 sm:py-1.5 bg-purple-50 border-2 border-purple-200 rounded">
+        <span className="text-[9px] sm:text-xs font-semibold text-purple-700 whitespace-nowrap">
+          <span className="hidden xs:inline">Page </span><span className="text-purple-900">{currentPage}</span>/<span className="text-purple-900">{totalPages}</span>
         </span>
       </div>
     </div>
