@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowUpDown, Plus, HelpCircle } from 'lucide-react';
+import { ArrowUpDown, Plus, HelpCircle, Search } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -414,6 +414,15 @@ const HomePage = () => {
                 </select>
                 <ArrowUpDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               </div>
+
+              {/* Search Button - Desktop Only */}
+              <button
+                onClick={() => setIsSearchOverlayOpen(true)}
+                className="hidden md:flex btn-secondary p-2"
+                aria-label="Search"
+              >
+                <Search className="w-5 h-5" />
+              </button>
 
               {/* Help Button */}
               <button
