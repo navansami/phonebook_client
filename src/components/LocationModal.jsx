@@ -41,16 +41,16 @@ const LocationModal = ({ isOpen, onClose }) => {
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn"
       onClick={handleBackdropClick}
     >
-      <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-800">Hotel Contact Information</h2>
+        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Hotel Contact Information</h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             aria-label="Close"
           >
-            <X className="w-6 h-6 text-gray-600" />
+            <X className="w-6 h-6 text-gray-600 dark:text-gray-300" />
           </button>
         </div>
 
@@ -74,23 +74,23 @@ const LocationModal = ({ isOpen, onClose }) => {
 
           {/* Fax */}
           <div className="flex items-start gap-4">
-            <div className="p-3 bg-gray-50 rounded-full">
-              <Printer className="w-6 h-6 text-gray-600" />
+            <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-full">
+              <Printer className="w-6 h-6 text-gray-600 dark:text-gray-300" />
             </div>
             <div className="flex-1">
               <p className="text-sm font-medium text-gray-500 mb-1">Fax</p>
-              <p className="text-lg text-gray-800 font-medium">{hotelInfo.fax}</p>
+              <p className="text-lg text-gray-800 dark:text-white font-medium">{hotelInfo.fax}</p>
             </div>
           </div>
 
           {/* PO Box */}
           <div className="flex items-start gap-4">
-            <div className="p-3 bg-gray-50 rounded-full">
-              <MapPin className="w-6 h-6 text-gray-600" />
+            <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-full">
+              <MapPin className="w-6 h-6 text-gray-600 dark:text-gray-300" />
             </div>
             <div className="flex-1">
               <p className="text-sm font-medium text-gray-500 mb-1">Postal Address</p>
-              <p className="text-lg text-gray-800 font-medium">{hotelInfo.poBox}</p>
+              <p className="text-lg text-gray-800 dark:text-white font-medium">{hotelInfo.poBox}</p>
             </div>
           </div>
 
@@ -111,14 +111,14 @@ const LocationModal = ({ isOpen, onClose }) => {
           </div>
 
           {/* Divider */}
-          <div className="border-t border-gray-200 my-6"></div>
+          <div className="border-t border-gray-200 dark:border-gray-700 my-6"></div>
 
           {/* Website */}
           <a
             href={hotelInfo.website}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-yellow-500 hover:shadow-md transition-all group"
+            className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-yellow-500 dark:hover:border-yellow-500 hover:shadow-md transition-all group"
           >
             <div className="flex items-center gap-4">
               <div className="p-3 bg-yellow-50 rounded-full">
@@ -131,7 +131,7 @@ const LocationModal = ({ isOpen, onClose }) => {
                 </p>
               </div>
             </div>
-            <ExternalLink className="w-5 h-5 text-gray-400 group-hover:text-yellow-600" />
+            <ExternalLink className="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:text-yellow-600" />
           </a>
 
           {/* Google Maps */}
@@ -139,7 +139,7 @@ const LocationModal = ({ isOpen, onClose }) => {
             href={hotelInfo.mapsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-yellow-500 hover:shadow-md transition-all group"
+            className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-yellow-500 dark:hover:border-yellow-500 hover:shadow-md transition-all group"
           >
             <div className="flex items-center gap-4">
               <div className="p-3 bg-yellow-50 rounded-full">
@@ -152,7 +152,7 @@ const LocationModal = ({ isOpen, onClose }) => {
                 </p>
               </div>
             </div>
-            <ExternalLink className="w-5 h-5 text-gray-400 group-hover:text-yellow-600" />
+            <ExternalLink className="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:text-yellow-600" />
           </a>
         </div>
       </div>

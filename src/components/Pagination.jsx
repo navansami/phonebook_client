@@ -103,8 +103,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         className={`
           hidden sm:block p-1.5 rounded-lg transition-all duration-200 border-2
           ${currentPage === 1
-            ? 'text-gray-300 border-gray-200 cursor-not-allowed bg-gray-50'
-            : 'text-purple-600 border-purple-200 hover:bg-purple-50 hover:border-purple-400 hover:shadow-md active:scale-95'
+            ? 'text-gray-300 border-gray-200 dark:text-gray-500 dark:border-gray-700 cursor-not-allowed bg-gray-50 dark:bg-gray-800'
+            : 'text-purple-600 dark:text-accent-400 border-purple-200 dark:border-accent-700 bg-white dark:bg-gray-800 hover:bg-purple-50 dark:hover:bg-gray-700 hover:border-purple-400 dark:hover:border-accent-500 hover:shadow-md active:scale-95'
           }
         `}
         aria-label="First page"
@@ -120,8 +120,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         className={`
           p-0.5 sm:p-1.5 rounded transition-all duration-200 border-2
           ${currentPage === 1
-            ? 'text-gray-300 border-gray-200 cursor-not-allowed bg-gray-50'
-            : 'text-purple-600 border-purple-200 hover:bg-purple-50 hover:border-purple-400 hover:shadow-md active:scale-95'
+            ? 'text-gray-300 border-gray-200 dark:text-gray-500 dark:border-gray-700 cursor-not-allowed bg-gray-50 dark:bg-gray-800'
+            : 'text-purple-600 dark:text-accent-400 border-purple-200 dark:border-accent-700 bg-white dark:bg-gray-800 hover:bg-purple-50 dark:hover:bg-gray-700 hover:border-purple-400 dark:hover:border-accent-500 hover:shadow-md active:scale-95'
           }
         `}
         aria-label="Previous page"
@@ -137,7 +137,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
             return (
               <span
                 key={page}
-                className="px-1 sm:px-3 py-2 text-purple-400 text-sm sm:text-base font-medium select-none"
+                className="px-1 sm:px-3 py-2 text-purple-400 dark:text-accent-400 text-sm sm:text-base font-medium select-none"
               >
                 •••
               </span>
@@ -153,8 +153,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
               className={`
                 min-w-[28px] sm:min-w-[38px] h-[28px] sm:h-[38px] px-1 sm:px-2.5 py-0.5 sm:py-1.5 rounded text-xs sm:text-sm font-semibold transition-all duration-200 border-2
                 ${isActive
-                  ? 'bg-gradient-to-br from-purple-500 to-violet-500 text-white border-purple-600 shadow-lg shadow-purple-200 scale-105'
-                  : 'text-purple-700 border-purple-200 bg-white hover:bg-purple-50 hover:border-purple-400 hover:shadow-md hover:scale-105 active:scale-95'
+                  ? 'bg-gradient-to-br from-purple-500 to-violet-500 text-white border-purple-600 dark:border-accent-500 shadow-lg shadow-purple-200 dark:shadow-accent-900/30 scale-105'
+                  : 'text-purple-700 dark:text-accent-300 border-purple-200 dark:border-accent-700 bg-white dark:bg-gray-800 hover:bg-purple-50 dark:hover:bg-gray-700 hover:border-purple-400 dark:hover:border-accent-500 hover:shadow-md hover:scale-105 active:scale-95'
                 }
               `}
               aria-label={`Page ${page}`}
@@ -173,8 +173,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         className={`
           p-0.5 sm:p-1.5 rounded transition-all duration-200 border-2
           ${currentPage === totalPages
-            ? 'text-gray-300 border-gray-200 cursor-not-allowed bg-gray-50'
-            : 'text-purple-600 border-purple-200 hover:bg-purple-50 hover:border-purple-400 hover:shadow-md active:scale-95'
+            ? 'text-gray-300 border-gray-200 dark:text-gray-500 dark:border-gray-700 cursor-not-allowed bg-gray-50 dark:bg-gray-800'
+            : 'text-purple-600 dark:text-accent-400 border-purple-200 dark:border-accent-700 bg-white dark:bg-gray-800 hover:bg-purple-50 dark:hover:bg-gray-700 hover:border-purple-400 dark:hover:border-accent-500 hover:shadow-md active:scale-95'
           }
         `}
         aria-label="Next page"
@@ -190,8 +190,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         className={`
           hidden sm:block p-1.5 rounded-lg transition-all duration-200 border-2
           ${currentPage === totalPages
-            ? 'text-gray-300 border-gray-200 cursor-not-allowed bg-gray-50'
-            : 'text-purple-600 border-purple-200 hover:bg-purple-50 hover:border-purple-400 hover:shadow-md active:scale-95'
+            ? 'text-gray-300 border-gray-200 dark:text-gray-500 dark:border-gray-700 cursor-not-allowed bg-gray-50 dark:bg-gray-800'
+            : 'text-purple-600 dark:text-accent-400 border-purple-200 dark:border-accent-700 bg-white dark:bg-gray-800 hover:bg-purple-50 dark:hover:bg-gray-700 hover:border-purple-400 dark:hover:border-accent-500 hover:shadow-md active:scale-95'
           }
         `}
         aria-label="Last page"
@@ -201,9 +201,9 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
       </button>
 
       {/* Page indicator text */}
-      <div className="ml-0.5 sm:ml-3 px-1.5 sm:px-3 py-0.5 sm:py-1.5 bg-purple-50 border-2 border-purple-200 rounded">
-        <span className="text-[9px] sm:text-xs font-semibold text-purple-700 whitespace-nowrap">
-          <span className="hidden xs:inline">Page </span><span className="text-purple-900">{currentPage}</span>/<span className="text-purple-900">{totalPages}</span>
+      <div className="ml-0.5 sm:ml-3 px-1.5 sm:px-3 py-0.5 sm:py-1.5 bg-purple-50 dark:bg-gray-800 border-2 border-purple-200 dark:border-accent-700 rounded">
+        <span className="text-[9px] sm:text-xs font-semibold text-purple-700 dark:text-accent-300 whitespace-nowrap">
+          <span className="hidden xs:inline">Page </span><span className="text-purple-900 dark:text-accent-200">{currentPage}</span>/<span className="text-purple-900 dark:text-accent-200">{totalPages}</span>
         </span>
       </div>
     </div>

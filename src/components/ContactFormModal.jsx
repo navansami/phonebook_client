@@ -177,7 +177,7 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn"
       onClick={handleBackdropClick}
     >
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-5 flex items-center justify-between z-10">
           <div className="flex items-center gap-3">
@@ -202,15 +202,15 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
           <div className="px-6 py-6 space-y-5">
             {/* Info Banner */}
-            <div className="bg-indigo-50 border-l-4 border-indigo-600 rounded-lg p-4">
-              <p className="text-sm text-indigo-800">
+            <div className="bg-indigo-50 dark:bg-indigo-900/20 border-l-4 border-indigo-600 dark:border-indigo-500 rounded-lg p-4">
+              <p className="text-sm text-indigo-800 dark:text-indigo-200">
                 <span className="font-semibold">Note:</span> This contact will be added directly to the global phone book and will be visible to all users immediately.
               </p>
             </div>
 
             {/* Name */}
             <div>
-              <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="name" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                 Full Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -220,8 +220,8 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="John Doe"
-                className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${
-                  errors.name ? 'border-red-500' : 'border-gray-200'
+                className={`w-full px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${
+                  errors.name ? 'border-red-500' : 'border-gray-200 dark:border-gray-600'
                 }`}
                 disabled={isLoading}
               />
@@ -234,7 +234,7 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Designation */}
               <div>
-                <label htmlFor="designation" className="block text-sm font-semibold text-gray-700 mb-2">
+                <label htmlFor="designation" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                   Designation
                 </label>
                 <input
@@ -244,14 +244,14 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
                   value={formData.designation}
                   onChange={handleChange}
                   placeholder="Manager"
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                   disabled={isLoading}
                 />
               </div>
 
               {/* Department */}
               <div>
-                <label htmlFor="department" className="block text-sm font-semibold text-gray-700 mb-2">
+                <label htmlFor="department" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                   Department
                 </label>
                 <input
@@ -261,7 +261,7 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
                   value={formData.department}
                   onChange={handleChange}
                   placeholder="Sales"
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                   disabled={isLoading}
                 />
               </div>
@@ -269,7 +269,7 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
 
             {/* Company */}
             <div>
-              <label htmlFor="company" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="company" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                 Company
               </label>
               <input
@@ -279,14 +279,14 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
                 value={formData.company}
                 onChange={handleChange}
                 placeholder="Fairmont The Palm"
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                 disabled={isLoading}
               />
             </div>
 
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                 Email Address
               </label>
               <input
@@ -296,8 +296,8 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="john@fairmont.com"
-                className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${
-                  errors.email ? 'border-red-500' : 'border-gray-200'
+                className={`w-full px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${
+                  errors.email ? 'border-red-500' : 'border-gray-200 dark:border-gray-600'
                 }`}
                 disabled={isLoading}
               />
@@ -310,7 +310,7 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Mobile */}
               <div>
-                <label htmlFor="mobile" className="block text-sm font-semibold text-gray-700 mb-2">
+                <label htmlFor="mobile" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                   Mobile Number
                 </label>
                 <input
@@ -320,8 +320,8 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
                   value={formData.mobile}
                   onChange={handleChange}
                   placeholder="+971 50 123 4567"
-                  className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${
-                    errors.mobile ? 'border-red-500' : 'border-gray-200'
+                  className={`w-full px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${
+                    errors.mobile ? 'border-red-500' : 'border-gray-200 dark:border-gray-600'
                   }`}
                   disabled={isLoading}
                 />
@@ -332,7 +332,7 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
 
               {/* Landline */}
               <div>
-                <label htmlFor="landline" className="block text-sm font-semibold text-gray-700 mb-2">
+                <label htmlFor="landline" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                   Landline
                 </label>
                 <input
@@ -342,8 +342,8 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
                   value={formData.landline}
                   onChange={handleChange}
                   placeholder="+971 4 123 4567"
-                  className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${
-                    errors.landline ? 'border-red-500' : 'border-gray-200'
+                  className={`w-full px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${
+                    errors.landline ? 'border-red-500' : 'border-gray-200 dark:border-gray-600'
                   }`}
                   disabled={isLoading}
                 />
@@ -355,7 +355,7 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
 
             {/* Extension */}
             <div>
-              <label htmlFor="extension" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="extension" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                 Extension
               </label>
               <input
@@ -365,14 +365,14 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
                 value={formData.extension}
                 onChange={handleChange}
                 placeholder="3301"
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                 disabled={isLoading}
               />
             </div>
 
             {/* Website */}
             <div>
-              <label htmlFor="website" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="website" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                 Website
               </label>
               <input
@@ -382,14 +382,14 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
                 value={formData.website}
                 onChange={handleChange}
                 placeholder="https://example.com"
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                 disabled={isLoading}
               />
             </div>
 
             {/* Languages */}
             <div>
-              <label htmlFor="languages" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="languages" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                 Languages
               </label>
               <input
@@ -400,10 +400,10 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
                 onChange={(e) => setLanguageInput(e.target.value)}
                 onKeyDown={handleAddLanguage}
                 placeholder="Type a language and press Enter"
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                 disabled={isLoading}
               />
-              <p className="text-gray-500 text-xs mt-1.5">Press Enter to add each language</p>
+              <p className="text-gray-500 dark:text-gray-400 text-xs mt-1.5">Press Enter to add each language</p>
 
               {/* Language Chips */}
               {languages.length > 0 && (
@@ -411,13 +411,13 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
                   {languages.map((language, index) => (
                     <span
                       key={index}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full text-sm font-medium"
                     >
                       {language}
                       <button
                         type="button"
                         onClick={() => handleRemoveLanguage(language)}
-                        className="hover:bg-indigo-200 rounded-full p-0.5 transition-colors"
+                        className="hover:bg-indigo-200 dark:hover:bg-indigo-800 rounded-full p-0.5 transition-colors"
                         disabled={isLoading}
                       >
                         <X className="w-3.5 h-3.5" />
@@ -430,7 +430,7 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
 
             {/* Tags */}
             <div>
-              <label htmlFor="tags" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="tags" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                 Tags
               </label>
               <input
@@ -441,10 +441,10 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={handleAddTag}
                 placeholder="Type a tag and press Enter"
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                 disabled={isLoading}
               />
-              <p className="text-gray-500 text-xs mt-1.5">Press Enter to add each tag</p>
+              <p className="text-gray-500 dark:text-gray-400 text-xs mt-1.5">Press Enter to add each tag</p>
 
               {/* Tag Chips */}
               {tags.length > 0 && (
@@ -452,13 +452,13 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
                   {tags.map((tag, index) => (
                     <span
                       key={index}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 text-purple-700 rounded-full text-sm font-medium"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm font-medium"
                     >
                       {tag}
                       <button
                         type="button"
                         onClick={() => handleRemoveTag(tag)}
-                        className="hover:bg-purple-200 rounded-full p-0.5 transition-colors"
+                        className="hover:bg-purple-200 dark:hover:bg-purple-800 rounded-full p-0.5 transition-colors"
                         disabled={isLoading}
                       >
                         <X className="w-3.5 h-3.5" />
@@ -471,7 +471,7 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
 
             {/* Comments */}
             <div>
-              <label htmlFor="comments" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="comments" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                 Additional Comments
               </label>
               <textarea
@@ -481,19 +481,19 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
                 onChange={handleChange}
                 rows="4"
                 placeholder="Any additional information..."
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none"
+                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none"
                 disabled={isLoading}
               />
             </div>
           </div>
 
           {/* Actions */}
-          <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4 flex flex-col-reverse sm:flex-row gap-3">
+          <div className="sticky bottom-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-6 py-4 flex flex-col-reverse sm:flex-row gap-3">
             <button
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              className="w-full sm:w-auto px-6 py-3 border-2 border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+              className="w-full sm:w-auto px-6 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
             >
               Cancel
             </button>

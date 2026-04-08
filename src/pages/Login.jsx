@@ -81,13 +81,13 @@ const Login = () => {
         </div>
 
         {/* Login Form */}
-        <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 sm:p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Username Field */}
             <div>
               <label
                 htmlFor="username"
-                className="block text-sm font-semibold text-gray-700 mb-2"
+                className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2"
               >
                 Username
               </label>
@@ -115,7 +115,7 @@ const Login = () => {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-semibold text-gray-700 mb-2"
+                className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2"
               >
                 Password
               </label>

@@ -38,36 +38,36 @@ const ConfirmModal = ({
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn"
     >
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
         {/* Header */}
-        <div className="px-6 py-4 flex items-start justify-between border-b border-gray-200">
+        <div className="px-6 py-4 flex items-start justify-between border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-start gap-3">
             {isDanger && (
               <div className="p-2 bg-red-100 rounded-full">
                 <AlertTriangle className="w-5 h-5 text-red-600" />
               </div>
             )}
-            <h2 className="text-xl font-bold text-gray-800">{title}</h2>
+            <h2 className="text-xl font-bold text-gray-800 dark:text-white">{title}</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+            className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             aria-label="Close"
           >
-            <X className="w-5 h-5 text-gray-600" />
+            <X className="w-5 h-5 text-gray-600 dark:text-gray-300" />
           </button>
         </div>
 
         {/* Content */}
         <div className="px-6 py-4">
-          <p className="text-gray-600">{message}</p>
+          <p className="text-gray-600 dark:text-gray-300">{message}</p>
         </div>
 
         {/* Actions */}
-        <div className="px-6 py-4 flex flex-col-reverse sm:flex-row gap-3 border-t border-gray-200">
+        <div className="px-6 py-4 flex flex-col-reverse sm:flex-row gap-3 border-t border-gray-200 dark:border-gray-700">
           <button
             onClick={onClose}
-            className="w-full sm:w-auto px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            className="w-full sm:w-auto px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           >
             {cancelText}
           </button>

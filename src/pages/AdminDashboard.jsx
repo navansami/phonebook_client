@@ -305,8 +305,8 @@ const AdminDashboard = () => {
   const TableHeader = ({ column, label, sortable = true }) => (
     <th
       onClick={() => sortable && handleSort(column)}
-      className={`px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider ${
-        sortable ? 'cursor-pointer hover:bg-gray-100' : ''
+      className={`px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider ${
+        sortable ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700' : ''
       }`}
     >
       <div className="flex items-center gap-1">
@@ -319,10 +319,10 @@ const AdminDashboard = () => {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-violet-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-violet-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-indigo-600 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600 font-medium">Loading contacts...</p>
+          <p className="text-gray-600 dark:text-gray-300 font-medium">Loading contacts...</p>
         </div>
       </div>
     );
@@ -331,12 +331,12 @@ const AdminDashboard = () => {
   // Error state
   if (isError) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-violet-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-violet-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 flex items-center justify-center">
         <div className="text-center max-w-md">
           <div className="card p-8">
             <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Error Loading Contacts</h2>
-            <p className="text-gray-600">{error?.response?.data?.message || 'Something went wrong'}</p>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Error Loading Contacts</h2>
+            <p className="text-gray-600 dark:text-gray-300">{error?.response?.data?.message || 'Something went wrong'}</p>
           </div>
         </div>
       </div>
@@ -344,20 +344,20 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-violet-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-violet-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Modern Header with Actions */}
         <div className="mb-8">
           <div className="card p-6">
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
               <div className="flex-1">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-3">
                   Admin Dashboard
                   <span className="badge badge-primary text-base px-4 py-2">
                     {processedContacts.length} {processedContacts.length === 1 ? 'Contact' : 'Contacts'}
                   </span>
                 </h1>
-                <p className="text-gray-600">
+                <p className="text-gray-600 dark:text-gray-300">
                   Manage all contacts with full CRUD operations
                 </p>
               </div>
@@ -375,7 +375,7 @@ const AdminDashboard = () => {
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="btn-secondary flex items-center gap-2 text-red-600 hover:bg-red-50"
+                  className="btn-secondary flex items-center gap-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                   title="Logout"
                 >
                   <LogOut className="w-5 h-5" />
@@ -416,7 +416,7 @@ const AdminDashboard = () => {
 
           {/* Results count */}
           {searchTerm && (
-            <div className="mt-4 text-sm text-gray-600">
+            <div className="mt-4 text-sm text-gray-600 dark:text-gray-300">
               Showing {paginatedContacts.length} of {processedContacts.length} contacts
               {searchTerm && ` (filtered from ${contactsData?.contacts?.length || 0} total)`}
             </div>
@@ -424,30 +424,30 @@ const AdminDashboard = () => {
         </div>
 
         {/* Desktop Table View */}
-        <div className="hidden lg:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="hidden lg:block bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 table-fixed">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 table-fixed">
+              <thead className="bg-gray-50 dark:bg-gray-900/60">
                 <tr>
-                  <th className="w-16 px-3 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                  <th className="w-16 px-3 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     Photo
                   </th>
                   <TableHeader column="name" label="Name" />
                   <TableHeader column="designation" label="Designation" />
                   <TableHeader column="department" label="Department" />
-                  <th className="w-48 px-3 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                  <th className="w-48 px-3 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="w-24 px-3 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                  <th className="w-24 px-3 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {paginatedContacts.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="px-4 py-12 text-center">
-                      <div className="text-gray-500">
+                      <div className="text-gray-500 dark:text-gray-400">
                         <AlertCircle className="w-12 h-12 mx-auto mb-2 opacity-50" />
                         <p className="text-lg font-medium">No contacts found</p>
                         <p className="text-sm">
@@ -458,34 +458,34 @@ const AdminDashboard = () => {
                   </tr>
                 ) : (
                   paginatedContacts.map((contact) => (
-                    <tr key={contact.id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={contact.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                       <td className="px-3 py-3">
                         {contact.profile_picture ? (
                           <img
                             src={contact.profile_picture}
                             alt={contact.name}
-                            className="w-10 h-10 rounded-full object-cover border-2 border-indigo-100"
+                            className="w-10 h-10 rounded-full object-cover border-2 border-indigo-100 dark:border-indigo-800"
                           />
                         ) : (
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
-                            <User className="w-5 h-5 text-indigo-400" />
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/40 dark:to-purple-900/40 flex items-center justify-center">
+                            <User className="w-5 h-5 text-indigo-400 dark:text-indigo-300" />
                           </div>
                         )}
                       </td>
                       <td className="px-3 py-3">
-                        <div className="text-sm font-semibold text-gray-900 truncate">{contact.name}</div>
+                        <div className="text-sm font-semibold text-gray-900 dark:text-white truncate">{contact.name}</div>
                         {contact.email && (
                           <div className="text-xs text-gray-500 truncate">{contact.email}</div>
                         )}
                       </td>
                       <td className="px-3 py-3">
-                        <div className="text-sm text-gray-700 truncate">{contact.designation || '-'}</div>
+                        <div className="text-sm text-gray-700 dark:text-gray-200 truncate">{contact.designation || '-'}</div>
                         {contact.mobile && (
                           <div className="text-xs text-gray-500">{contact.mobile}</div>
                         )}
                       </td>
                       <td className="px-3 py-3">
-                        <div className="text-sm text-gray-700 truncate">{contact.department || '-'}</div>
+                        <div className="text-sm text-gray-700 dark:text-gray-200 truncate">{contact.department || '-'}</div>
                         {contact.extension && (
                           <div className="text-xs text-gray-500">Ext: {contact.extension}</div>
                         )}
@@ -537,14 +537,14 @@ const AdminDashboard = () => {
                         <div className="flex items-center gap-1">
                           <button
                             onClick={() => handleEditContact(contact)}
-                            className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                            className="p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
                             title="Edit contact"
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDeleteClick(contact)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                             title="Delete contact"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -562,33 +562,33 @@ const AdminDashboard = () => {
         {/* Tablet/Mobile Card View */}
         <div className="lg:hidden space-y-4">
           {paginatedContacts.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
               <AlertCircle className="w-12 h-12 mx-auto mb-2 text-gray-400" />
-              <p className="text-lg font-medium text-gray-900">No contacts found</p>
+              <p className="text-lg font-medium text-gray-900 dark:text-white">No contacts found</p>
               <p className="text-sm text-gray-500">
                 {searchTerm ? 'Try adjusting your search' : 'Get started by adding a new contact'}
               </p>
             </div>
           ) : (
             paginatedContacts.map((contact) => (
-              <div key={contact.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+              <div key={contact.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                 {/* Header */}
                 <div className="flex items-start gap-4 mb-3">
                   {contact.profile_picture ? (
                     <img
                       src={contact.profile_picture}
                       alt={contact.name}
-                      className="w-16 h-16 rounded-full object-cover border-2 border-indigo-100 flex-shrink-0"
+                      className="w-16 h-16 rounded-full object-cover border-2 border-indigo-100 dark:border-indigo-800 flex-shrink-0"
                     />
                   ) : (
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center flex-shrink-0">
-                      <User className="w-8 h-8 text-indigo-400" />
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/40 dark:to-purple-900/40 flex items-center justify-center flex-shrink-0">
+                      <User className="w-8 h-8 text-indigo-400 dark:text-indigo-300" />
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-gray-900 text-lg truncate">{contact.name}</h3>
+                    <h3 className="font-medium text-gray-900 dark:text-white text-lg truncate">{contact.name}</h3>
                     {contact.designation && (
-                      <p className="text-sm text-gray-600 truncate">{contact.designation}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300 truncate">{contact.designation}</p>
                     )}
                   </div>
                   <div className="flex gap-2 flex-wrap">
@@ -598,7 +598,7 @@ const AdminDashboard = () => {
                       className={`badge ${
                         contact.is_ert
                           ? 'badge-warning'
-                          : 'bg-gray-100 text-gray-700'
+                          : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200'
                       } disabled:opacity-50`}
                     >
                       {contact.is_ert ? (
@@ -618,8 +618,8 @@ const AdminDashboard = () => {
                       disabled={toggleIFAMutation.isLoading}
                       className={`badge ${
                         contact.is_ifa
-                          ? 'badge-info'
-                          : 'bg-gray-100 text-gray-700'
+                          ? 'badge-primary'
+                          : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200'
                       } disabled:opacity-50`}
                     >
                       {contact.is_ifa ? (
@@ -663,41 +663,41 @@ const AdminDashboard = () => {
                   {contact.department && (
                     <div className="text-sm">
                       <span className="text-gray-500">Department:</span>{' '}
-                      <span className="text-gray-900">{contact.department}</span>
+                      <span className="text-gray-900 dark:text-white">{contact.department}</span>
                     </div>
                   )}
                   {contact.email && (
                     <div className="text-sm">
                       <span className="text-gray-500">Email:</span>{' '}
-                      <span className="text-gray-900">{contact.email}</span>
+                      <span className="text-gray-900 dark:text-white">{contact.email}</span>
                     </div>
                   )}
                   {contact.mobile && (
                     <div className="text-sm">
                       <span className="text-gray-500">Mobile:</span>{' '}
-                      <span className="text-gray-900">{contact.mobile}</span>
+                      <span className="text-gray-900 dark:text-white">{contact.mobile}</span>
                     </div>
                   )}
                   {contact.landline && (
                     <div className="text-sm">
                       <span className="text-gray-500">Landline:</span>{' '}
-                      <span className="text-gray-900">{contact.landline}</span>
+                      <span className="text-gray-900 dark:text-white">{contact.landline}</span>
                     </div>
                   )}
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-2 pt-3 border-t border-gray-200">
+                <div className="flex gap-2 pt-3 border-t border-gray-200 dark:border-gray-700">
                   <button
                     onClick={() => handleEditContact(contact)}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors font-medium"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-indigo-600 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors font-medium"
                   >
                     <Edit2 className="w-4 h-4" />
                     Edit
                   </button>
                   <button
                     onClick={() => handleDeleteClick(contact)}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors font-medium"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-red-600 dark:text-red-300 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors font-medium"
                   >
                     <Trash2 className="w-4 h-4" />
                     Delete
@@ -711,7 +711,7 @@ const AdminDashboard = () => {
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="mt-6 card p-4 flex items-center justify-between">
-            <div className="text-sm text-gray-600 font-medium">
+            <div className="text-sm text-gray-600 dark:text-gray-300 font-medium">
               Page {currentPage} of {totalPages}
             </div>
             <div className="flex gap-2">

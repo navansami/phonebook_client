@@ -64,7 +64,7 @@ const AccessCodeModal = ({ isOpen, onVerified }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gradient-to-br from-purple-900/95 via-indigo-900/95 to-violet-900/95 backdrop-blur-md">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-fadeIn">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-fadeIn">
         {/* Header */}
         <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-6 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-4">
@@ -82,17 +82,17 @@ const AccessCodeModal = ({ isOpen, onVerified }) => {
         <div className="px-8 py-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Hotel Code Hint */}
-            <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+            <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4">
               <div className="flex items-start gap-3">
                 <Lock className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-indigo-900 mb-1">
+                  <p className="text-sm font-medium text-indigo-900 dark:text-indigo-100 mb-1">
                     Hotel Code Format
                   </p>
-                  <p className="text-sm text-indigo-700">
+                  <p className="text-sm text-indigo-700 dark:text-indigo-300">
                     H-****
                   </p>
-                  <p className="text-xs text-indigo-600 mt-2">
+                  <p className="text-xs text-indigo-600 dark:text-indigo-400 mt-2">
                     Please contact your supervisor if you don't have the code
                   </p>
                 </div>
@@ -101,7 +101,7 @@ const AccessCodeModal = ({ isOpen, onVerified }) => {
 
             {/* Input Field */}
             <div>
-              <label htmlFor="hotel-code" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="hotel-code" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                 Enter Hotel Code
               </label>
               <div className="relative">
@@ -112,8 +112,8 @@ const AccessCodeModal = ({ isOpen, onVerified }) => {
                   value={code}
                   onChange={handleChange}
                   placeholder="H-****"
-                  className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-lg font-mono uppercase ${
-                    error ? 'border-red-500' : 'border-gray-300'
+                  className={`w-full px-4 py-3 pr-12 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-lg font-mono uppercase ${
+                    error ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
                   }`}
                   maxLength={6}
                   autoComplete="off"
@@ -122,7 +122,7 @@ const AccessCodeModal = ({ isOpen, onVerified }) => {
                 <button
                   type="button"
                   onClick={() => setShowCode(!showCode)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                   tabIndex={-1}
                 >
                   {showCode ? (
@@ -152,8 +152,8 @@ const AccessCodeModal = ({ isOpen, onVerified }) => {
           </form>
 
           {/* Security Note */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <div className="flex items-start gap-2 text-gray-500">
+          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex items-start gap-2 text-gray-500 dark:text-gray-400">
               <Shield className="w-4 h-4 flex-shrink-0 mt-0.5" />
               <p className="text-xs">
                 This phonebook is for authorized hotel staff only. Your access will remain active during this browser session.
