@@ -474,7 +474,7 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
                     </button>
                   </div>
 
-                  <div className="w-full flex-1 text-center sm:text-left">
+                  <div className="min-w-0 w-full flex-1 text-center sm:text-left">
                     {isEditing ? (
                       <div className="space-y-4">
                         <input
@@ -505,15 +505,15 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
 
                     <div className="mt-4 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
                       {contact.department && (
-                        <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-purple-200 bg-white/80 px-3 py-1.5 text-sm font-medium text-slate-600 shadow-sm dark:border-[#29556e] dark:bg-[#13222d] dark:text-slate-200">
+                        <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-purple-200 bg-white/80 px-3 py-1.5 text-sm font-medium text-slate-600 shadow-sm dark:border-[#29556e] dark:bg-[#13222d] dark:text-slate-200 sm:max-w-[16rem]">
                           <MapPin className="h-3.5 w-3.5 shrink-0 text-purple-500 dark:text-[#69d6ff]" />
                           <span className="truncate">{contact.department}</span>
                         </span>
                       )}
                       {contact.email && (
-                        <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-purple-200 bg-white/80 px-3 py-1.5 text-sm font-medium text-slate-600 shadow-sm dark:border-[#29556e] dark:bg-[#13222d] dark:text-slate-200 sm:max-w-[24rem]">
+                        <span className="inline-flex min-w-0 max-w-full items-center gap-2 rounded-full border border-purple-200 bg-white/80 px-3 py-1.5 text-sm font-medium text-slate-600 shadow-sm dark:border-[#29556e] dark:bg-[#13222d] dark:text-slate-200 sm:max-w-[19rem] md:max-w-[21rem]">
                           <Mail className="h-3.5 w-3.5 shrink-0 text-purple-500 dark:text-[#69d6ff]" />
-                          <span className="truncate">{contact.email}</span>
+                          <span className="min-w-0 truncate">{contact.email}</span>
                         </span>
                       )}
                     </div>
