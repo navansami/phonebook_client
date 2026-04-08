@@ -10,7 +10,7 @@ import axios from 'axios';
 // Move component definitions outside to prevent re-creation on every render
 const InputField = ({ icon: Icon, label, value, onChange, type = "text", placeholder, isEditing }) => (
   <div className="space-y-2">
-    <label className="flex items-center gap-2 text-sm font-semibold text-purple-700 dark:text-accent-400 uppercase tracking-wide">
+    <label className="flex items-center gap-2 text-sm font-semibold text-purple-700 dark:text-[#69d6ff] uppercase tracking-wide">
       <Icon className="w-4 h-4" />
       {label}
     </label>
@@ -20,10 +20,10 @@ const InputField = ({ icon: Icon, label, value, onChange, type = "text", placeho
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-4 py-3 border-2 border-purple-200 dark:border-accent-700 bg-white dark:bg-gray-800 rounded-lg focus:border-purple-500 dark:focus:border-accent-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-accent-800/50 outline-none transition-all text-gray-900 dark:text-gray-100"
+        className="w-full px-4 py-3 border-2 border-purple-200 dark:border-[#29556e] bg-white dark:bg-gray-800 rounded-lg focus:border-purple-500 dark:focus:border-[#23b7f2] focus:ring-2 focus:ring-purple-200 dark:focus:ring-[#23b7f2]/20 outline-none transition-all text-gray-900 dark:text-gray-100"
       />
     ) : (
-      <div className="px-4 py-3 bg-purple-50/50 dark:bg-accent-900/10 rounded-lg border border-purple-100 dark:border-accent-800/50">
+      <div className="px-4 py-3 bg-purple-50/50 dark:bg-[#102431] rounded-lg border border-purple-100 dark:border-[#29556e]">
         <p className="text-gray-900 dark:text-gray-100 font-medium">{value || '-'}</p>
       </div>
     )}
@@ -32,7 +32,7 @@ const InputField = ({ icon: Icon, label, value, onChange, type = "text", placeho
 
 const TextAreaField = ({ icon: Icon, label, value, onChange, placeholder, isEditing }) => (
   <div className="space-y-2">
-    <label className="flex items-center gap-2 text-sm font-semibold text-purple-700 dark:text-accent-400 uppercase tracking-wide">
+    <label className="flex items-center gap-2 text-sm font-semibold text-purple-700 dark:text-[#69d6ff] uppercase tracking-wide">
       <Icon className="w-4 h-4" />
       {label}
     </label>
@@ -42,10 +42,10 @@ const TextAreaField = ({ icon: Icon, label, value, onChange, placeholder, isEdit
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={3}
-        className="w-full px-4 py-3 border-2 border-purple-200 dark:border-accent-700 bg-white dark:bg-gray-800 rounded-lg focus:border-purple-500 dark:focus:border-accent-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-accent-800/50 outline-none transition-all text-gray-900 dark:text-gray-100 resize-none"
+        className="w-full px-4 py-3 border-2 border-purple-200 dark:border-[#29556e] bg-white dark:bg-gray-800 rounded-lg focus:border-purple-500 dark:focus:border-[#23b7f2] focus:ring-2 focus:ring-purple-200 dark:focus:ring-[#23b7f2]/20 outline-none transition-all text-gray-900 dark:text-gray-100 resize-none"
       />
     ) : (
-      <div className="px-4 py-3 bg-purple-50/50 dark:bg-accent-900/10 rounded-lg border border-purple-100 dark:border-accent-800/50">
+      <div className="px-4 py-3 bg-purple-50/50 dark:bg-[#102431] rounded-lg border border-purple-100 dark:border-[#29556e]">
         <p className="text-gray-900 dark:text-gray-100 whitespace-pre-wrap">{value || '-'}</p>
       </div>
     )}
@@ -225,12 +225,11 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
       <div className={`fixed top-0 right-0 z-50 h-full w-full md:w-1/2 bg-white dark:bg-gray-900 shadow-2xl transition-all duration-300 ease-out flex flex-col ${
         isClosing ? 'translate-x-full' : 'translate-x-0'
       }`}>
-        {/* Decorative gold/purple splash in corner */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-50/30 dark:bg-accent-900/10 rounded-full blur-3xl -z-10" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-violet-50/20 dark:bg-accent-800/10 rounded-full blur-3xl -z-10" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-50/30 dark:bg-[#102431]/40 rounded-full blur-3xl -z-10" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-violet-50/20 dark:bg-[#0f1e2a]/40 rounded-full blur-3xl -z-10" />
 
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-purple-600 via-violet-600 to-purple-600 dark:from-accent-700 dark:via-accent-600 dark:to-accent-700 px-6 py-5 shadow-lg z-10 flex-shrink-0">
+        <div className="sticky top-0 bg-gradient-to-r from-purple-600 via-violet-600 to-purple-600 dark:from-[#1b232d] dark:via-[#1f2833] dark:to-[#1b232d] border-b dark:border-[#29556e] px-6 py-5 shadow-lg z-10 flex-shrink-0">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <User className="w-6 h-6 text-white" />
@@ -267,7 +266,7 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
                   <button
                     onClick={handleSave}
                     disabled={updateMutation.isLoading}
-                    className="px-4 py-2 bg-white text-purple-600 dark:text-accent-700 hover:bg-white/90 rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-bold disabled:opacity-50"
+                    className="px-4 py-2 bg-white text-purple-600 dark:text-[#0f6f9a] hover:bg-white/90 rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-bold disabled:opacity-50"
                   >
                     <Save className="w-4 h-4" />
                     {updateMutation.isLoading ? 'Saving...' : 'Save'}
@@ -307,9 +306,9 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
             {/* Left Column - Profile and Main Info (2/3 width) */}
             <div className="lg:col-span-2 space-y-6">
               {/* Profile Picture Section */}
-              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 bg-gradient-to-br from-purple-50 via-white to-violet-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-750 p-4 sm:p-6 rounded-2xl border-2 border-purple-200 dark:border-accent-700/50 shadow-lg dark:shadow-black/30">
+              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 bg-gradient-to-br from-purple-50 via-white to-violet-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-750 p-4 sm:p-6 rounded-2xl border-2 border-purple-200 dark:border-[#29556e] shadow-lg dark:shadow-black/30">
                 <div className="relative flex-shrink-0">
-                  <div className="w-32 h-32 sm:w-48 sm:h-48 rounded-2xl bg-gradient-to-br from-purple-400 via-violet-400 to-fuchsia-400 dark:from-accent-400 dark:via-accent-500 dark:to-accent-600 p-1 shadow-xl">
+                  <div className="w-32 h-32 sm:w-48 sm:h-48 rounded-2xl bg-gradient-to-br from-purple-400 via-violet-400 to-fuchsia-400 dark:from-[#23b7f2] dark:via-[#1296e2] dark:to-[#0d6fb0] p-1 shadow-xl">
                     <div className="w-full h-full rounded-xl bg-white flex items-center justify-center overflow-hidden">
                       {profileImage ? (
                         <img src={profileImage} alt={editedContact.name} className="w-full h-full object-cover" />
@@ -327,14 +326,14 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
                       type="text"
                       value={editedContact.name || ''}
                       onChange={(e) => handleInputChange('name', e.target.value)}
-                      className="text-xl sm:text-2xl font-bold text-gray-900 border-b-2 border-purple-300 focus:border-purple-600 outline-none bg-transparent w-full py-2"
+                      className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white border-b-2 border-purple-300 dark:border-[#29556e] focus:border-purple-600 dark:focus:border-[#23b7f2] outline-none bg-transparent w-full py-2"
                       placeholder="Contact Name"
                     />
                   ) : (
                     <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{contact.name}</h3>
                   )}
                   {!isEditing && contact.designation && (
-                    <p className="text-purple-600 dark:text-accent-300 font-semibold text-base sm:text-lg mt-1">{contact.designation}</p>
+                    <p className="text-purple-600 dark:text-[#69d6ff] font-semibold text-base sm:text-lg mt-1">{contact.designation}</p>
                   )}
                   {!isEditing && contact.department && (
                     <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">📍 {contact.department}</p>
@@ -346,7 +345,7 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
               <div className="space-y-6">
             {/* Professional Details */}
             <div className="space-y-4">
-              <h3 className="text-lg font-bold text-purple-900 dark:text-accent-400 border-b-2 border-purple-200 dark:border-accent-700/60 pb-2">Professional Details</h3>
+              <h3 className="text-lg font-bold text-purple-900 dark:text-[#69d6ff] border-b-2 border-purple-200 dark:border-[#29556e] pb-2">Professional Details</h3>
               <InputField
                 icon={Briefcase}
                 label="Designation"
@@ -375,7 +374,7 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
 
             {/* Contact Information */}
             <div className="space-y-4">
-              <h3 className="text-lg font-bold text-purple-900 dark:text-accent-400 border-b-2 border-purple-200 dark:border-accent-700/60 pb-2">Contact Information</h3>
+              <h3 className="text-lg font-bold text-purple-900 dark:text-[#69d6ff] border-b-2 border-purple-200 dark:border-[#29556e] pb-2">Contact Information</h3>
               <InputField
                 icon={Mail}
                 label="Email"
@@ -424,7 +423,7 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
 
             {/* Languages */}
             <div className="space-y-4">
-              <h3 className="text-lg font-bold text-purple-900 dark:text-accent-400 border-b-2 border-purple-200 dark:border-accent-700/60 pb-2">Languages</h3>
+              <h3 className="text-lg font-bold text-purple-900 dark:text-[#69d6ff] border-b-2 border-purple-200 dark:border-[#29556e] pb-2">Languages</h3>
               <div className="space-y-2">
                 {isEditing ? (
                   <input
@@ -432,7 +431,7 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
                     value={editedContact.languages?.join(', ') || ''}
                     onChange={(e) => handleArrayChange('languages', e.target.value)}
                     placeholder="English, Arabic, French (comma separated)"
-                    className="w-full px-4 py-3 border-2 border-purple-200 dark:border-accent-700 bg-white dark:bg-gray-800 rounded-lg focus:border-purple-500 dark:focus:border-accent-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-accent-800/50 outline-none transition-all text-gray-900 dark:text-gray-100"
+                    className="w-full px-4 py-3 border-2 border-purple-200 dark:border-[#29556e] bg-white dark:bg-gray-800 rounded-lg focus:border-purple-500 dark:focus:border-[#23b7f2] focus:ring-2 focus:ring-purple-200 dark:focus:ring-[#23b7f2]/20 outline-none transition-all text-gray-900 dark:text-gray-100"
                   />
                 ) : (
                   <div className="flex flex-wrap gap-2">
@@ -440,13 +439,13 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
                       editedContact.languages.map((lang, index) => (
                         <span
                           key={index}
-                          className="px-3 py-1.5 bg-gradient-to-r from-purple-100 to-violet-100 dark:from-accent-900/40 dark:to-accent-800/30 border border-purple-200 dark:border-accent-700 text-purple-700 dark:text-accent-300 rounded-full text-sm font-bold"
+                          className="px-3 py-1.5 bg-gradient-to-r from-purple-100 to-violet-100 dark:from-[#102431] dark:to-[#0f1e2a] border border-purple-200 dark:border-[#29556e] text-purple-700 dark:text-[#7eddff] rounded-full text-sm font-bold"
                         >
                           {lang}
                         </span>
                       ))
                     ) : (
-                      <p className="text-gray-500 dark:text-gray-400 px-4 py-3 bg-purple-50/50 dark:bg-accent-900/10 rounded-lg border border-purple-100 dark:border-accent-800/50">No languages specified</p>
+                      <p className="text-gray-500 dark:text-gray-400 px-4 py-3 bg-purple-50/50 dark:bg-[#102431] rounded-lg border border-purple-100 dark:border-[#29556e]">No languages specified</p>
                     )}
                   </div>
                 )}
@@ -458,12 +457,12 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
             {/* Right Column - Tags & Comments (1/3 width) */}
             <div className="lg:col-span-1 space-y-6">
               {/* Tags Section */}
-              <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border-2 border-purple-200 dark:border-accent-700/50 shadow-lg h-fit">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border-2 border-purple-200 dark:border-[#29556e] shadow-lg h-fit">
                 <div className="flex items-center gap-2 mb-4">
-                  <div className="p-2 bg-purple-100 dark:bg-accent-900/30 rounded-lg">
-                    <Tag className="w-5 h-5 text-purple-600 dark:text-accent-300" />
+                  <div className="p-2 bg-purple-100 dark:bg-[#102431] rounded-lg">
+                    <Tag className="w-5 h-5 text-purple-600 dark:text-[#69d6ff]" />
                   </div>
-                  <h3 className="text-sm font-bold text-purple-900 dark:text-accent-300 uppercase tracking-wide">Tags</h3>
+                  <h3 className="text-sm font-bold text-purple-900 dark:text-[#69d6ff] uppercase tracking-wide">Tags</h3>
                 </div>
                 {isEditing ? (
                   <div className="space-y-3">
@@ -473,7 +472,7 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
                       onChange={(e) => setTagInput(e.target.value)}
                       onKeyDown={handleAddTag}
                       placeholder="Type a tag and press Enter..."
-                      className="w-full px-4 py-3 border-2 border-purple-200 dark:border-accent-700 bg-white dark:bg-gray-700 rounded-lg focus:border-purple-500 dark:focus:border-accent-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-accent-800/50 outline-none transition-all text-sm text-gray-900 dark:text-gray-100"
+                      className="w-full px-4 py-3 border-2 border-purple-200 dark:border-[#29556e] bg-white dark:bg-gray-700 rounded-lg focus:border-purple-500 dark:focus:border-[#23b7f2] focus:ring-2 focus:ring-purple-200 dark:focus:ring-[#23b7f2]/20 outline-none transition-all text-sm text-gray-900 dark:text-gray-100"
                     />
                     <div className="flex flex-wrap gap-2">
                       {editedContact.tags && editedContact.tags.length > 0 ? (
@@ -516,12 +515,12 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
               </div>
 
               {/* Comments Section */}
-              <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border-2 border-purple-200 dark:border-accent-700/50 shadow-lg">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border-2 border-purple-200 dark:border-[#29556e] shadow-lg">
                 <div className="flex items-center gap-2 mb-4">
-                  <div className="p-2 bg-purple-100 dark:bg-accent-900/30 rounded-lg">
-                    <MessageSquare className="w-5 h-5 text-purple-600 dark:text-accent-300" />
+                  <div className="p-2 bg-purple-100 dark:bg-[#102431] rounded-lg">
+                    <MessageSquare className="w-5 h-5 text-purple-600 dark:text-[#69d6ff]" />
                   </div>
-                  <h3 className="text-sm font-bold text-purple-900 dark:text-accent-300 uppercase tracking-wide">Comments</h3>
+                  <h3 className="text-sm font-bold text-purple-900 dark:text-[#69d6ff] uppercase tracking-wide">Comments</h3>
                 </div>
                 {isEditing ? (
                   <textarea
@@ -529,7 +528,7 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
                     onChange={(e) => handleInputChange('comments', e.target.value)}
                     placeholder="Additional notes or comments..."
                     rows={6}
-                    className="w-full px-4 py-3 border-2 border-purple-200 dark:border-accent-700 bg-white dark:bg-gray-700 rounded-lg focus:border-purple-500 dark:focus:border-accent-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-accent-800/50 outline-none transition-all text-sm text-gray-900 dark:text-gray-100 resize-none"
+                    className="w-full px-4 py-3 border-2 border-purple-200 dark:border-[#29556e] bg-white dark:bg-gray-700 rounded-lg focus:border-purple-500 dark:focus:border-[#23b7f2] focus:ring-2 focus:ring-purple-200 dark:focus:ring-[#23b7f2]/20 outline-none transition-all text-sm text-gray-900 dark:text-gray-100 resize-none"
                   />
                 ) : (
                   <div className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-gray-700 dark:to-gray-700 rounded-lg p-4 border border-purple-100 dark:border-gray-600 min-h-[150px]">

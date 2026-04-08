@@ -35,7 +35,7 @@ const HelpModal = ({ isOpen, onClose }) => {
         {/* Header */}
         <div className="sticky top-0 bg-white dark:bg-dark-card border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Info className="w-6 h-6 text-accent" />
+            <Info className="w-6 h-6 text-accent dark:text-[#23b7f2]" />
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
               Help & Instructions
             </h2>
@@ -54,7 +54,7 @@ const HelpModal = ({ isOpen, onClose }) => {
           {/* Keyboard Shortcuts */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <Keyboard className="w-5 h-5 text-accent" />
+              <Keyboard className="w-5 h-5 text-accent dark:text-[#23b7f2]" />
               <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
                 Keyboard Shortcuts
               </h3>
@@ -78,7 +78,7 @@ const HelpModal = ({ isOpen, onClose }) => {
           {/* Features */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <Zap className="w-5 h-5 text-accent" />
+              <Zap className="w-5 h-5 text-accent dark:text-[#23b7f2]" />
               <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
                 Features
               </h3>
@@ -87,8 +87,8 @@ const HelpModal = ({ isOpen, onClose }) => {
               {/* Search */}
               <div className="flex gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
                 <div className="flex-shrink-0">
-                  <div className="p-2 rounded-full bg-accent/10">
-                    <Search className="w-5 h-5 text-accent" />
+                  <div className="p-2 rounded-full bg-accent/10 dark:bg-[#23b7f2]/10">
+                    <Search className="w-5 h-5 text-accent dark:text-[#23b7f2]" />
                   </div>
                 </div>
                 <div>
@@ -105,8 +105,8 @@ const HelpModal = ({ isOpen, onClose }) => {
               {/* Favorites */}
               <div className="flex gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
                 <div className="flex-shrink-0">
-                  <div className="p-2 rounded-full bg-accent/10">
-                    <Star className="w-5 h-5 text-accent" />
+                  <div className="p-2 rounded-full bg-accent/10 dark:bg-[#23b7f2]/10">
+                    <Star className="w-5 h-5 text-accent dark:text-[#23b7f2]" />
                   </div>
                 </div>
                 <div>
@@ -123,8 +123,8 @@ const HelpModal = ({ isOpen, onClose }) => {
               {/* Filters */}
               <div className="flex gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
                 <div className="flex-shrink-0">
-                  <div className="p-2 rounded-full bg-accent/10">
-                    <Filter className="w-5 h-5 text-accent" />
+                  <div className="p-2 rounded-full bg-accent/10 dark:bg-[#23b7f2]/10">
+                    <Filter className="w-5 h-5 text-accent dark:text-[#23b7f2]" />
                   </div>
                 </div>
                 <div>
@@ -141,8 +141,8 @@ const HelpModal = ({ isOpen, onClose }) => {
               {/* Quick Actions */}
               <div className="flex gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
                 <div className="flex-shrink-0">
-                  <div className="p-2 rounded-full bg-accent/10">
-                    <Heart className="w-5 h-5 text-accent" />
+                  <div className="p-2 rounded-full bg-accent/10 dark:bg-[#23b7f2]/10">
+                    <Heart className="w-5 h-5 text-accent dark:text-[#23b7f2]" />
                   </div>
                 </div>
                 <div>
@@ -159,7 +159,7 @@ const HelpModal = ({ isOpen, onClose }) => {
           </div>
 
           {/* Tips */}
-          <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
+          <div className="bg-accent/10 dark:bg-[#23b7f2]/10 border border-accent/20 dark:border-[#23b7f2]/20 rounded-lg p-4">
             <h3 className="font-semibold text-gray-800 dark:text-white mb-2">
               Pro Tips
             </h3>

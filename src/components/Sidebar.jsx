@@ -39,27 +39,27 @@ const Sidebar = ({
 
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-white dark:bg-black transition-colors">
+    <div className="flex flex-col h-full bg-white dark:bg-[#05070b] transition-colors">
       {/* Logo */}
-      <div className="px-6 py-6 border-b border-gray-200 dark:border-[#2a2a2a] bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-black dark:to-black transition-colors">
+      <div className="px-6 py-6 border-b border-gray-200 dark:border-[#1b212a] bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-[#05070b] dark:to-[#05070b] transition-colors">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 dark:from-[#d4af37] dark:to-[#b68c1e] rounded-xl flex items-center justify-center shadow-lg">
+          <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 dark:from-[#23b7f2] dark:to-[#1296e2] rounded-xl flex items-center justify-center shadow-lg">
             <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
             </svg>
           </div>
           <div className="flex-1">
-            <h1 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-[#f2d778] dark:to-[#d4af37]">
+            <h1 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-[#f4fbff] dark:to-[#53d1ff]">
               Phonebook
             </h1>
-            <p className="text-xs text-gray-600 dark:text-[#b9a86a] font-medium">Fairmont The Palm</p>
+            <p className="text-xs text-gray-600 dark:text-[#8ea4b8] font-medium">Fairmont The Palm</p>
           </div>
         </div>
       </div>
 
       {/* Navigation Section */}
       <nav className="flex-1 overflow-y-auto px-4 py-6">
-        <h2 className="text-xs font-semibold text-gray-500 dark:text-[#8f8457] uppercase tracking-wider mb-3 px-2">
+        <h2 className="text-xs font-semibold text-gray-500 dark:text-[#6f8396] uppercase tracking-wider mb-3 px-2">
           Navigation
         </h2>
         <div className="space-y-1">
@@ -81,13 +81,13 @@ const Sidebar = ({
       </nav>
 
       {/* Theme Toggle at Bottom */}
-      <div className="p-4 border-t border-gray-200 dark:border-[#2a2a2a] transition-colors">
+      <div className="p-4 border-t border-gray-200 dark:border-[#1b212a] transition-colors">
         <div className="flex items-center justify-between px-2 py-1">
-          <span className="text-sm font-medium text-gray-700 dark:text-[#f0e3b2]">Dark Mode</span>
+          <span className="text-sm font-medium text-gray-700 dark:text-[#dbe4ec]">Dark Mode</span>
           <button
             onClick={toggleTheme}
             className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-            style={{ backgroundColor: theme === 'dark' ? '#d4af37' : '#7c3aed' }}
+            style={{ backgroundColor: theme === 'dark' ? '#23b7f2' : '#7c3aed' }}
             aria-label="Toggle theme"
           >
             <span
@@ -96,7 +96,7 @@ const Sidebar = ({
               }`}
             >
               {theme === 'dark' ? (
-                <Moon className="w-3 h-3 text-[#9a7718]" />
+                <Moon className="w-3 h-3 text-[#0f6f9a]" />
               ) : (
                 <Sun className="w-3 h-3 text-gray-600" />
               )}
@@ -132,7 +132,7 @@ const Sidebar = ({
 
       {/* Mobile Sidebar - Slides in from left */}
       <aside
-        className={`lg:hidden fixed top-0 left-0 h-full w-64 bg-white dark:bg-black shadow-2xl z-40 transform transition-transform duration-300 ease-in-out ${
+        className={`lg:hidden fixed top-0 left-0 h-full w-64 bg-white dark:bg-[#05070b] shadow-2xl z-40 transform transition-transform duration-300 ease-in-out ${
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -140,7 +140,7 @@ const Sidebar = ({
       </aside>
 
       {/* Desktop Sidebar - Always visible */}
-      <aside className="hidden lg:block fixed top-0 left-0 h-screen w-64 bg-white dark:bg-black border-r border-gray-200 dark:border-[#2a2a2a] shadow-sm transition-colors">
+      <aside className="hidden lg:block fixed top-0 left-0 h-screen w-64 bg-white dark:bg-[#05070b] border-r border-gray-200 dark:border-[#1b212a] shadow-sm transition-colors">
         {sidebarContent}
       </aside>
     </>
