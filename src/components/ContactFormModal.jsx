@@ -1,6 +1,87 @@
 import { useState, useEffect } from 'react';
-import { X, Loader2, Plus } from 'lucide-react';
+import {
+  X,
+  Loader2,
+  Plus,
+  User,
+  Mail,
+  Phone,
+  Building2,
+  Briefcase,
+  Globe,
+  Tag,
+  MessageSquare,
+  Languages,
+} from 'lucide-react';
 import toast from 'react-hot-toast';
+
+const SectionCard = ({ eyebrow, title, children }) => (
+  <div className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm dark:border-[#243244] dark:bg-[#151e29]">
+    <div className="mb-4">
+      <p className="text-xs font-semibold uppercase tracking-[0.28em] text-gray-400 dark:text-gray-500">{eyebrow}</p>
+      <h3 className="mt-1 text-xl font-bold text-gray-900 dark:text-white">{title}</h3>
+    </div>
+    {children}
+  </div>
+);
+
+const Field = ({ icon: Icon, label, error, required = false, children, hint }) => (
+  <div>
+    <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200">
+      {Icon && <Icon className="h-4 w-4 text-indigo-500 dark:text-[#7fdcff]" />}
+      <span>
+        {label} {required && <span className="text-red-500">*</span>}
+      </span>
+    </label>
+    {children}
+    {hint && <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{hint}</p>}
+    {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+  </div>
+);
+
+const chipClasses =
+  'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium';
+
+const FloatingInput = ({
+  icon: Icon,
+  label,
+  name,
+  value,
+  onChange,
+  type = 'text',
+  placeholder,
+  error,
+  required = false,
+  disabled = false,
+}) => (
+  <div>
+    <div className="relative">
+      <input
+        type={type}
+        id={name}
+        name={name}
+        value={value}
+        onChange={onChange}
+        placeholder=" "
+        disabled={disabled}
+        className={`peer w-full border-0 border-b-2 bg-transparent px-0 pb-2 pt-6 text-gray-900 transition-all focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:text-gray-100 ${
+          error ? 'border-red-500' : 'border-gray-300 focus:border-indigo-500 dark:border-gray-600 dark:focus:border-[#7fdcff]'
+        }`}
+      />
+      <label
+        htmlFor={name}
+        className="pointer-events-none absolute left-0 top-5 flex origin-left items-center gap-2 text-sm text-gray-500 transition-all duration-200 peer-focus:top-0 peer-focus:scale-90 peer-focus:text-indigo-500 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:scale-90 dark:text-gray-400 dark:peer-focus:text-[#7fdcff]"
+      >
+        {Icon && <Icon className="h-4 w-4" />}
+        <span>
+          {label} {required && <span className="text-red-500">*</span>}
+        </span>
+      </label>
+    </div>
+    {placeholder && <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{placeholder}</p>}
+    {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+  </div>
+);
 
 const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
   const [formData, setFormData] = useState({
@@ -13,7 +94,7 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
     landline: '',
     extension: '',
     website: '',
-    comments: ''
+    comments: '',
   });
   const [languages, setLanguages] = useState([]);
   const [tags, setTags] = useState([]);
@@ -34,7 +115,7 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
         landline: contact.landline || '',
         extension: contact.extension || '',
         website: contact.website || '',
-        comments: contact.comments || ''
+        comments: contact.comments || '',
       });
       setLanguages(contact.languages || []);
       setTags(contact.tags || []);
@@ -49,7 +130,7 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
         landline: '',
         extension: '',
         website: '',
-        comments: ''
+        comments: '',
       });
       setLanguages([]);
       setTags([]);
@@ -108,10 +189,9 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    // Clear error for this field when user types
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+      setErrors((prev) => ({ ...prev, [name]: '' }));
     }
   };
 
@@ -127,7 +207,7 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
   };
 
   const handleRemoveLanguage = (languageToRemove) => {
-    setLanguages(languages.filter(lang => lang !== languageToRemove));
+    setLanguages(languages.filter((lang) => lang !== languageToRemove));
   };
 
   const handleAddTag = (e) => {
@@ -142,7 +222,7 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
   };
 
   const handleRemoveTag = (tagToRemove) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
+    setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
   const handleSubmit = async (e) => {
@@ -158,8 +238,8 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
     try {
       const submitData = {
         ...formData,
-        languages: languages,
-        tags: tags
+        languages,
+        tags,
       };
 
       await onSubmit(submitData);
@@ -173,337 +253,216 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex justify-end bg-black/45 backdrop-blur-sm"
-      onClick={handleBackdropClick}
-    >
-      <div className="h-full w-full max-w-2xl overflow-hidden border-l border-gray-200 bg-white shadow-2xl dark:border-[#243244] dark:bg-[#121a23] flex flex-col">
-        {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-5 flex items-center justify-between z-10">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-              <Plus className="w-6 h-6 text-white" />
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/45 backdrop-blur-sm" onClick={handleBackdropClick}>
+      <div className="flex h-full w-full max-w-3xl flex-col overflow-hidden border-l border-gray-200 bg-white shadow-2xl dark:border-[#243244] dark:bg-[#121a23]">
+        <div className="sticky top-0 z-10 border-b border-white/10 bg-gradient-to-r from-[#3f6ee8] via-[#5b4fe7] to-[#8c3ae8] px-6 py-5 text-white shadow-lg shadow-indigo-900/15">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="mb-1 text-xs font-semibold uppercase tracking-[0.28em] text-white/70">
+                {contact ? 'Directory Update' : 'New Directory Entry'}
+              </p>
+              <h2 className="text-3xl font-bold leading-none">{contact ? 'Edit Contact' : 'Add Contact'}</h2>
             </div>
-            <h2 className="text-2xl font-bold text-white">
-              {contact ? 'Edit Contact' : 'Add New Contact'}
-            </h2>
+            <button
+              onClick={onClose}
+              disabled={isLoading}
+              className="rounded-full p-2 transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
+              aria-label="Close"
+            >
+              <X className="h-6 w-6" />
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            disabled={isLoading}
-            className="p-2 rounded-full hover:bg-white/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label="Close"
-          >
-            <X className="w-6 h-6 text-white" />
-          </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
-          <div className="px-6 py-6 space-y-5">
-            {/* Info Banner */}
-            <div className="bg-indigo-50 dark:bg-indigo-900/20 border-l-4 border-indigo-600 dark:border-indigo-500 rounded-lg p-4">
-              <p className="text-sm text-indigo-800 dark:text-indigo-200">
-                <span className="font-semibold">Note:</span> This contact will be added directly to the global phone book and will be visible to all users immediately.
-              </p>
-            </div>
-
-            {/* Name */}
-            <div>
-              <label htmlFor="name" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                Full Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="John Doe"
-                className={`w-full px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${
-                  errors.name ? 'border-red-500' : 'border-gray-200 dark:border-gray-600'
-                }`}
-                disabled={isLoading}
-              />
-              {errors.name && <p className="text-red-500 text-sm mt-1.5 flex items-center gap-1">
-                <span>⚠️</span> {errors.name}
-              </p>}
-            </div>
-
-            {/* Two Column Layout */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {/* Designation */}
-              <div>
-                <label htmlFor="designation" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                  Designation
-                </label>
-                <input
-                  type="text"
-                  id="designation"
-                  name="designation"
-                  value={formData.designation}
-                  onChange={handleChange}
-                  placeholder="Manager"
-                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                  disabled={isLoading}
-                />
-              </div>
-
-              {/* Department */}
-              <div>
-                <label htmlFor="department" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                  Department
-                </label>
-                <input
-                  type="text"
-                  id="department"
-                  name="department"
-                  value={formData.department}
-                  onChange={handleChange}
-                  placeholder="Sales"
-                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                  disabled={isLoading}
-                />
-              </div>
-            </div>
-
-            {/* Company */}
-            <div>
-              <label htmlFor="company" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                Company
-              </label>
-              <input
-                type="text"
-                id="company"
-                name="company"
-                value={formData.company}
-                onChange={handleChange}
-                placeholder="Fairmont The Palm"
-                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                disabled={isLoading}
-              />
-            </div>
-
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="john@fairmont.com"
-                className={`w-full px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${
-                  errors.email ? 'border-red-500' : 'border-gray-200 dark:border-gray-600'
-                }`}
-                disabled={isLoading}
-              />
-              {errors.email && <p className="text-red-500 text-sm mt-1.5 flex items-center gap-1">
-                <span>⚠️</span> {errors.email}
-              </p>}
-            </div>
-
-            {/* Two Column Layout for Phone Numbers */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {/* Mobile */}
-              <div>
-                <label htmlFor="mobile" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                  Mobile Number
-                </label>
-                <input
-                  type="tel"
-                  id="mobile"
-                  name="mobile"
-                  value={formData.mobile}
-                  onChange={handleChange}
-                  placeholder="+971 50 123 4567"
-                  className={`w-full px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${
-                    errors.mobile ? 'border-red-500' : 'border-gray-200 dark:border-gray-600'
-                  }`}
-                  disabled={isLoading}
-                />
-                {errors.mobile && <p className="text-red-500 text-sm mt-1.5 flex items-center gap-1">
-                  <span>⚠️</span> {errors.mobile}
-                </p>}
-              </div>
-
-              {/* Landline */}
-              <div>
-                <label htmlFor="landline" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                  Landline
-                </label>
-                <input
-                  type="tel"
-                  id="landline"
-                  name="landline"
-                  value={formData.landline}
-                  onChange={handleChange}
-                  placeholder="+971 4 123 4567"
-                  className={`w-full px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${
-                    errors.landline ? 'border-red-500' : 'border-gray-200 dark:border-gray-600'
-                  }`}
-                  disabled={isLoading}
-                />
-                {errors.landline && <p className="text-red-500 text-sm mt-1.5 flex items-center gap-1">
-                  <span>⚠️</span> {errors.landline}
-                </p>}
-              </div>
-            </div>
-
-            {/* Extension */}
-            <div>
-              <label htmlFor="extension" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                Extension
-              </label>
-              <input
-                type="text"
-                id="extension"
-                name="extension"
-                value={formData.extension}
-                onChange={handleChange}
-                placeholder="3301"
-                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                disabled={isLoading}
-              />
-            </div>
-
-            {/* Website */}
-            <div>
-              <label htmlFor="website" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                Website
-              </label>
-              <input
-                type="url"
-                id="website"
-                name="website"
-                value={formData.website}
-                onChange={handleChange}
-                placeholder="https://example.com"
-                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                disabled={isLoading}
-              />
-            </div>
-
-            {/* Languages */}
-            <div>
-              <label htmlFor="languages" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                Languages
-              </label>
-              <input
-                type="text"
-                id="languages"
-                name="languages"
-                value={languageInput}
-                onChange={(e) => setLanguageInput(e.target.value)}
-                onKeyDown={handleAddLanguage}
-                placeholder="Type a language and press Enter"
-                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                disabled={isLoading}
-              />
-              <p className="text-gray-500 dark:text-gray-400 text-xs mt-1.5">Press Enter to add each language</p>
-
-              {/* Language Chips */}
-              {languages.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {languages.map((language, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full text-sm font-medium"
-                    >
-                      {language}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveLanguage(language)}
-                        className="hover:bg-indigo-200 dark:hover:bg-indigo-800 rounded-full p-0.5 transition-colors"
-                        disabled={isLoading}
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </span>
-                  ))}
+          <div className="space-y-6 px-6 py-6">
+            <div className="rounded-3xl border border-indigo-100 bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.14),_transparent_32%),linear-gradient(135deg,#f8f8ff,#f3f6ff)] p-5 dark:border-[#2f4054] dark:bg-[radial-gradient(circle_at_top_left,_rgba(91,79,231,0.16),_transparent_30%),linear-gradient(135deg,#151e29,#17212d)]">
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+                <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-[28px] border-4 border-white bg-gradient-to-br from-indigo-100 to-purple-100 shadow-lg dark:border-[#243244] dark:from-[#1e3042] dark:to-[#2d2a4d] sm:mx-0">
+                  <User className="h-14 w-14 text-indigo-400 dark:text-indigo-300" />
                 </div>
-              )}
-            </div>
-
-            {/* Tags */}
-            <div>
-              <label htmlFor="tags" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                Tags
-              </label>
-              <input
-                type="text"
-                id="tags"
-                name="tags"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyDown={handleAddTag}
-                placeholder="Type a tag and press Enter"
-                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                disabled={isLoading}
-              />
-              <p className="text-gray-500 dark:text-gray-400 text-xs mt-1.5">Press Enter to add each tag</p>
-
-              {/* Tag Chips */}
-              {tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {tags.map((tag, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm font-medium"
-                    >
-                      {tag}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveTag(tag)}
-                        className="hover:bg-purple-200 dark:hover:bg-purple-800 rounded-full p-0.5 transition-colors"
-                        disabled={isLoading}
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </span>
-                  ))}
+                <div className="flex-1">
+                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-indigo-500 dark:text-[#7fdcff]">
+                    Guest Submission
+                  </p>
+                  <h3 className="mt-1 text-xl font-bold text-gray-900 dark:text-white">
+                    {formData.name || 'New contact request'}
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Submit a polished contact record using the same structured format as the admin workspace.
+                  </p>
+                  <div className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 font-medium text-indigo-700 shadow-sm ring-1 ring-indigo-200 dark:bg-[#1b2734] dark:text-[#8edfff] dark:ring-[#35526b]">
+                    <Plus className="h-4 w-4" />
+                    Public Directory Form
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
 
-            {/* Comments */}
-            <div>
-              <label htmlFor="comments" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                Additional Comments
-              </label>
-              <textarea
-                id="comments"
-                name="comments"
-                value={formData.comments}
-                onChange={handleChange}
-                rows="4"
-                placeholder="Any additional information..."
-                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none"
-                disabled={isLoading}
-              />
-            </div>
+            <SectionCard eyebrow="Core Details" title="Identity">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="md:col-span-2">
+                  <FloatingInput
+                    icon={User}
+                    label="Full Name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="John Doe"
+                    error={errors.name}
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+                <FloatingInput icon={Briefcase} label="Designation" name="designation" value={formData.designation} onChange={handleChange} placeholder="Manager" disabled={isLoading} />
+                <FloatingInput icon={Building2} label="Department" name="department" value={formData.department} onChange={handleChange} placeholder="Sales" disabled={isLoading} />
+                <FloatingInput icon={Building2} label="Company" name="company" value={formData.company} onChange={handleChange} placeholder="Fairmont The Palm" disabled={isLoading} />
+                <FloatingInput icon={Phone} label="Extension" name="extension" value={formData.extension} onChange={handleChange} placeholder="3301" disabled={isLoading} />
+              </div>
+            </SectionCard>
+
+            <SectionCard eyebrow="Reachability" title="Contact Channels">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="md:col-span-2">
+                  <FloatingInput
+                    icon={Mail}
+                    label="Email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="john@fairmont.com"
+                    error={errors.email}
+                    disabled={isLoading}
+                  />
+                </div>
+                <FloatingInput icon={Phone} label="Mobile" name="mobile" type="tel" value={formData.mobile} onChange={handleChange} placeholder="+971 50 123 4567" error={errors.mobile} disabled={isLoading} />
+                <FloatingInput icon={Phone} label="Landline" name="landline" type="tel" value={formData.landline} onChange={handleChange} placeholder="+971 4 123 4567" error={errors.landline} disabled={isLoading} />
+                <div className="md:col-span-2">
+                  <FloatingInput icon={Globe} label="Website" name="website" type="url" value={formData.website} onChange={handleChange} placeholder="https://example.com" disabled={isLoading} />
+                </div>
+              </div>
+            </SectionCard>
+
+            <SectionCard eyebrow="Classification" title="Languages, Tags, Notes">
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <Field icon={Languages} label="Languages" hint="Press Enter to add each language">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      id="languageInput"
+                      value={languageInput}
+                      onChange={(e) => setLanguageInput(e.target.value)}
+                      onKeyDown={handleAddLanguage}
+                      placeholder=" "
+                      className="peer w-full border-0 border-b-2 border-gray-300 bg-transparent px-0 pb-2 pt-6 text-gray-900 transition-all focus:border-indigo-500 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:border-gray-600 dark:text-gray-100 dark:focus:border-[#7fdcff]"
+                      disabled={isLoading}
+                    />
+                    <label
+                      htmlFor="languageInput"
+                      className="pointer-events-none absolute left-0 top-5 flex origin-left items-center gap-2 text-sm text-gray-500 transition-all duration-200 peer-focus:top-0 peer-focus:scale-90 peer-focus:text-indigo-500 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:scale-90 dark:text-gray-400 dark:peer-focus:text-[#7fdcff]"
+                    >
+                      <Languages className="h-4 w-4" />
+                      Type a language and press Enter
+                    </label>
+                  </div>
+                  {languages.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {languages.map((language, index) => (
+                        <span
+                          key={index}
+                          className={`${chipClasses} bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300`}
+                        >
+                          {language}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveLanguage(language)}
+                            className="rounded-full p-0.5 transition-colors hover:bg-indigo-200 dark:hover:bg-indigo-800"
+                            disabled={isLoading}
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </Field>
+
+                <Field icon={Tag} label="Tags" hint="Press Enter to add each tag">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      id="tagInput"
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value)}
+                      onKeyDown={handleAddTag}
+                      placeholder=" "
+                      className="peer w-full border-0 border-b-2 border-gray-300 bg-transparent px-0 pb-2 pt-6 text-gray-900 transition-all focus:border-indigo-500 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:border-gray-600 dark:text-gray-100 dark:focus:border-[#7fdcff]"
+                      disabled={isLoading}
+                    />
+                    <label
+                      htmlFor="tagInput"
+                      className="pointer-events-none absolute left-0 top-5 flex origin-left items-center gap-2 text-sm text-gray-500 transition-all duration-200 peer-focus:top-0 peer-focus:scale-90 peer-focus:text-indigo-500 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:scale-90 dark:text-gray-400 dark:peer-focus:text-[#7fdcff]"
+                    >
+                      <Tag className="h-4 w-4" />
+                      Type a tag and press Enter
+                    </label>
+                  </div>
+                  {tags.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className={`${chipClasses} bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300`}
+                        >
+                          {tag}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveTag(tag)}
+                            className="rounded-full p-0.5 transition-colors hover:bg-purple-200 dark:hover:bg-purple-800"
+                            disabled={isLoading}
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </Field>
+              </div>
+
+              <div className="mt-5">
+                <Field icon={MessageSquare} label="Comments">
+                  <textarea
+                    name="comments"
+                    value={formData.comments}
+                    onChange={handleChange}
+                    rows="4"
+                    placeholder="Any additional information..."
+                    className="w-full resize-none rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 transition-all focus:border-indigo-500 focus:outline-none focus:ring-0 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:border-[#7fdcff]"
+                    disabled={isLoading}
+                  />
+                </Field>
+              </div>
+            </SectionCard>
           </div>
 
-          {/* Actions */}
-          <div className="sticky bottom-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-6 py-4 flex flex-col-reverse sm:flex-row gap-3">
+          <div className="sticky bottom-0 flex flex-col-reverse gap-3 border-t border-gray-200 bg-white/95 px-6 py-4 backdrop-blur dark:border-[#243244] dark:bg-[#121a23]/95 sm:flex-row">
             <button
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              className="w-full sm:w-auto px-6 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+              className="w-full rounded-xl border border-gray-300 px-6 py-3 font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#34485e] dark:text-gray-200 dark:hover:bg-[#1f2b38] sm:w-auto"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full sm:flex-1 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-semibold shadow-lg"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#3f6ee8] via-[#5b4fe7] to-[#8c3ae8] px-6 py-3 font-semibold text-white shadow-lg shadow-indigo-900/20 transition-all hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-1"
             >
-              {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
-              {isLoading ? 'Adding...' : (contact ? 'Update Contact' : 'Add Contact')}
+              {isLoading && <Loader2 className="h-5 w-5 animate-spin" />}
+              {isLoading ? 'Saving...' : contact ? 'Update Contact' : 'Create Contact'}
             </button>
           </div>
         </form>

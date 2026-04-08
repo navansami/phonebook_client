@@ -4,6 +4,41 @@ import toast from 'react-hot-toast';
 import ImageCropModal from './ImageCropModal';
 import { uploadProfilePicture } from '../services/contactsApi';
 
+const FloatingInput = ({
+  label,
+  name,
+  value,
+  onChange,
+  type = 'text',
+  placeholder,
+  error,
+  required = false,
+  disabled = false,
+}) => (
+  <div className="relative">
+    <input
+      type={type}
+      id={name}
+      name={name}
+      value={value}
+      onChange={onChange}
+      placeholder=" "
+      disabled={disabled}
+      className={`peer w-full border-0 border-b-2 bg-transparent px-0 pb-2 pt-6 text-gray-900 transition-all focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:text-gray-100 ${
+        error ? 'border-red-500' : 'border-gray-300 focus:border-indigo-500 dark:border-gray-600 dark:focus:border-[#7fdcff]'
+      }`}
+    />
+    <label
+      htmlFor={name}
+      className="pointer-events-none absolute left-0 top-5 origin-left text-sm text-gray-500 transition-all duration-200 peer-focus:top-0 peer-focus:scale-90 peer-focus:text-indigo-500 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:scale-90 dark:text-gray-400 dark:peer-focus:text-[#7fdcff]"
+    >
+      {label} {required && <span className="text-red-500">*</span>}
+    </label>
+    {placeholder && <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{placeholder}</p>}
+    {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+  </div>
+);
+
 const AdminContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
   const [formData, setFormData] = useState({
     name: '',
@@ -302,86 +337,23 @@ const AdminContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
                 </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                    Full Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-2.5 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${
-                      errors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                    }`}
-                    disabled={isLoading}
-                    placeholder="John Doe"
-                  />
-                  {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+                  <FloatingInput label="Full Name" name="name" value={formData.name} onChange={handleChange} placeholder="John Doe" error={errors.name} required disabled={isLoading} />
                 </div>
 
                 <div>
-                  <label htmlFor="designation" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                    Designation
-                  </label>
-                  <input
-                    type="text"
-                    id="designation"
-                    name="designation"
-                    value={formData.designation}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                    disabled={isLoading}
-                    placeholder="Manager"
-                  />
+                  <FloatingInput label="Designation" name="designation" value={formData.designation} onChange={handleChange} placeholder="Manager" disabled={isLoading} />
                 </div>
 
                 <div>
-                  <label htmlFor="department" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                    Department
-                  </label>
-                  <input
-                    type="text"
-                    id="department"
-                    name="department"
-                    value={formData.department}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                    disabled={isLoading}
-                    placeholder="Sales"
-                  />
+                  <FloatingInput label="Department" name="department" value={formData.department} onChange={handleChange} placeholder="Sales" disabled={isLoading} />
                 </div>
 
                 <div>
-                  <label htmlFor="company" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                    Company
-                  </label>
-                  <input
-                    type="text"
-                    id="company"
-                    name="company"
-                    value={formData.company}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                    disabled={isLoading}
-                    placeholder="Fairmont The Palm"
-                  />
+                  <FloatingInput label="Company" name="company" value={formData.company} onChange={handleChange} placeholder="Fairmont The Palm" disabled={isLoading} />
                 </div>
 
                 <div>
-                  <label htmlFor="extension" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                    Extension
-                  </label>
-                  <input
-                    type="text"
-                    id="extension"
-                    name="extension"
-                    value={formData.extension}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                    disabled={isLoading}
-                    placeholder="3301"
-                  />
+                  <FloatingInput label="Extension" name="extension" value={formData.extension} onChange={handleChange} placeholder="3301" disabled={isLoading} />
                 </div>
               </div>
               </div>
@@ -396,76 +368,19 @@ const AdminContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
                 </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-2.5 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${
-                      errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                    }`}
-                    disabled={isLoading}
-                    placeholder="john@example.com"
-                  />
-                  {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                  <FloatingInput label="Email" name="email" type="email" value={formData.email} onChange={handleChange} placeholder="john@example.com" error={errors.email} disabled={isLoading} />
                 </div>
 
                 <div>
-                  <label htmlFor="mobile" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                    Mobile
-                  </label>
-                  <input
-                    type="tel"
-                    id="mobile"
-                    name="mobile"
-                    value={formData.mobile}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-2.5 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${
-                      errors.mobile ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                    }`}
-                    disabled={isLoading}
-                    placeholder="+971 50 123 4567"
-                  />
-                  {errors.mobile && <p className="text-red-500 text-sm mt-1">{errors.mobile}</p>}
+                  <FloatingInput label="Mobile" name="mobile" type="tel" value={formData.mobile} onChange={handleChange} placeholder="+971 50 123 4567" error={errors.mobile} disabled={isLoading} />
                 </div>
 
                 <div>
-                  <label htmlFor="landline" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                    Landline
-                  </label>
-                  <input
-                    type="tel"
-                    id="landline"
-                    name="landline"
-                    value={formData.landline}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-2.5 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${
-                      errors.landline ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                    }`}
-                    disabled={isLoading}
-                    placeholder="+971 4 123 4567"
-                  />
-                  {errors.landline && <p className="text-red-500 text-sm mt-1">{errors.landline}</p>}
+                  <FloatingInput label="Landline" name="landline" type="tel" value={formData.landline} onChange={handleChange} placeholder="+971 4 123 4567" error={errors.landline} disabled={isLoading} />
                 </div>
 
                 <div>
-                  <label htmlFor="website" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                    Website
-                  </label>
-                  <input
-                    type="url"
-                    id="website"
-                    name="website"
-                    value={formData.website}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                    disabled={isLoading}
-                    placeholder="https://example.com"
-                  />
+                  <FloatingInput label="Website" name="website" type="url" value={formData.website} onChange={handleChange} placeholder="https://example.com" disabled={isLoading} />
                 </div>
               </div>
               </div>
@@ -480,36 +395,12 @@ const AdminContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
                 </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="languages" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                    Languages
-                  </label>
-                  <input
-                    type="text"
-                    id="languages"
-                    name="languages"
-                    value={formData.languages}
-                    onChange={handleChange}
-                    placeholder="English, Arabic, Hindi"
-                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                    disabled={isLoading}
-                  />
+                  <FloatingInput label="Languages" name="languages" value={formData.languages} onChange={handleChange} placeholder="English, Arabic, Hindi" disabled={isLoading} />
                   <p className="text-gray-500 dark:text-gray-400 text-xs mt-1">Separate with commas</p>
                 </div>
 
                 <div>
-                  <label htmlFor="tags" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                    Tags
-                  </label>
-                  <input
-                    type="text"
-                    id="tags"
-                    name="tags"
-                    value={formData.tags}
-                    onChange={handleChange}
-                    placeholder="VIP, Management, IT"
-                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                    disabled={isLoading}
-                  />
+                  <FloatingInput label="Tags" name="tags" value={formData.tags} onChange={handleChange} placeholder="VIP, Management, IT" disabled={isLoading} />
                   <p className="text-gray-500 dark:text-gray-400 text-xs mt-1">Separate with commas</p>
                 </div>
               </div>

@@ -1,5 +1,20 @@
 import { useEffect, useState } from 'react';
-import { X, Mail, Phone, Building2, Briefcase, MessageSquare, Star, Languages, Tag, Shield, Edit2, Save, Globe, User, Upload, Loader2 } from 'lucide-react';
+import {
+  X,
+  Mail,
+  Phone,
+  Building2,
+  Briefcase,
+  MessageSquare,
+  Star,
+  Tag,
+  Shield,
+  Edit2,
+  Save,
+  Globe,
+  User,
+  MapPin,
+} from 'lucide-react';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -7,11 +22,10 @@ import { updateContact } from '../services/contactsApi';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 
-// Move component definitions outside to prevent re-creation on every render
-const InputField = ({ icon: Icon, label, value, onChange, type = "text", placeholder, isEditing }) => (
+const InputField = ({ icon: Icon, label, value, onChange, type = 'text', placeholder, isEditing }) => (
   <div className="space-y-2">
-    <label className="flex items-center gap-2 text-sm font-semibold text-purple-700 dark:text-[#69d6ff] uppercase tracking-wide">
-      <Icon className="w-4 h-4" />
+    <label className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-purple-700 dark:text-[#69d6ff]">
+      <Icon className="h-4 w-4" />
       {label}
     </label>
     {isEditing ? (
@@ -20,36 +34,31 @@ const InputField = ({ icon: Icon, label, value, onChange, type = "text", placeho
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-4 py-3 border-2 border-purple-200 dark:border-[#29556e] bg-white dark:bg-gray-800 rounded-lg focus:border-purple-500 dark:focus:border-[#23b7f2] focus:ring-2 focus:ring-purple-200 dark:focus:ring-[#23b7f2]/20 outline-none transition-all text-gray-900 dark:text-gray-100"
+        className="w-full rounded-xl border-2 border-purple-200 bg-white px-4 py-3 text-gray-900 outline-none transition-all focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:border-[#29556e] dark:bg-[#17212c] dark:text-gray-100 dark:focus:border-[#23b7f2] dark:focus:ring-[#23b7f2]/20"
       />
     ) : (
-      <div className="px-4 py-3 bg-purple-50/50 dark:bg-[#102431] rounded-lg border border-purple-100 dark:border-[#29556e]">
-        <p className="text-gray-900 dark:text-gray-100 font-medium">{value || '-'}</p>
+      <div className="rounded-xl border border-purple-100 bg-purple-50/60 px-4 py-3 dark:border-[#29556e] dark:bg-[#102431]">
+        <p className="break-words font-medium text-gray-900 dark:text-gray-100">{value || '-'}</p>
       </div>
     )}
   </div>
 );
 
-const TextAreaField = ({ icon: Icon, label, value, onChange, placeholder, isEditing }) => (
-  <div className="space-y-2">
-    <label className="flex items-center gap-2 text-sm font-semibold text-purple-700 dark:text-[#69d6ff] uppercase tracking-wide">
-      <Icon className="w-4 h-4" />
-      {label}
-    </label>
-    {isEditing ? (
-      <textarea
-        value={value || ''}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        rows={3}
-        className="w-full px-4 py-3 border-2 border-purple-200 dark:border-[#29556e] bg-white dark:bg-gray-800 rounded-lg focus:border-purple-500 dark:focus:border-[#23b7f2] focus:ring-2 focus:ring-purple-200 dark:focus:ring-[#23b7f2]/20 outline-none transition-all text-gray-900 dark:text-gray-100 resize-none"
-      />
-    ) : (
-      <div className="px-4 py-3 bg-purple-50/50 dark:bg-[#102431] rounded-lg border border-purple-100 dark:border-[#29556e]">
-        <p className="text-gray-900 dark:text-gray-100 whitespace-pre-wrap">{value || '-'}</p>
+const SectionCard = ({ title, description, children, icon: Icon }) => (
+  <section className="rounded-2xl border border-purple-200/80 bg-white/90 p-5 shadow-sm shadow-purple-100/40 dark:border-[#24465c] dark:bg-[#141b23] dark:shadow-[0_18px_40px_rgba(2,6,23,0.28)]">
+    <div className="mb-4 flex items-start gap-3 border-b border-purple-100 pb-3 dark:border-[#223242]">
+      {Icon && (
+        <div className="rounded-xl bg-purple-100 p-2.5 dark:bg-[#102431]">
+          <Icon className="h-5 w-5 text-purple-600 dark:text-[#69d6ff]" />
+        </div>
+      )}
+      <div>
+        <h3 className="text-base font-bold text-purple-900 dark:text-white">{title}</h3>
+        {description && <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{description}</p>}
       </div>
-    )}
-  </div>
+    </div>
+    {children}
+  </section>
 );
 
 const ContactDetailModal = ({ contact, isOpen, onClose }) => {
@@ -64,15 +73,14 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
   const [tagInput, setTagInput] = useState('');
 
   const CLOUDINARY_CLOUD_NAME = 'dgyqwlpcm';
-  const CLOUDINARY_UPLOAD_PRESET = 'ml_default'; // You may need to create an unsigned upload preset in Cloudinary
+  const CLOUDINARY_UPLOAD_PRESET = 'ml_default';
 
-  // Update edited contact when modal opens
   useEffect(() => {
     if (isOpen && contact) {
       setEditedContact(contact);
       setProfileImage(contact.profile_picture || null);
     }
-  }, [isOpen, contact?.id]); // Only update when modal opens or contact ID changes
+  }, [isOpen, contact?.id]);
 
   useEffect(() => {
     const handleEscape = (e) => {
@@ -90,7 +98,6 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
     };
   }, [isOpen]);
 
-  // Update mutation
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => updateContact(id, data),
     onSuccess: (response) => {
@@ -98,13 +105,10 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
       toast.success('Contact updated successfully!');
       setIsEditing(false);
 
-      // Update the local state with the saved data
-      // This ensures the modal shows the updated data immediately
       if (response?.data) {
         setEditedContact(response.data);
         setProfileImage(response.data.profile_picture || null);
       } else {
-        // If response doesn't include data, use editedContact
         setEditedContact({ ...editedContact });
       }
     },
@@ -118,12 +122,12 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
   const isFavorite = favorites.includes(contact.id);
 
   const handleInputChange = (field, value) => {
-    setEditedContact(prev => ({ ...prev, [field]: value }));
+    setEditedContact((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleArrayChange = (field, value) => {
-    const items = value.split(',').map(item => item.trim()).filter(item => item);
-    setEditedContact(prev => ({ ...prev, [field]: items }));
+    const items = value.split(',').map((item) => item.trim()).filter((item) => item);
+    setEditedContact((prev) => ({ ...prev, [field]: items }));
   };
 
   const handleAddTag = (e) => {
@@ -131,9 +135,9 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
       e.preventDefault();
       const currentTags = editedContact.tags || [];
       if (!currentTags.includes(tagInput.trim())) {
-        setEditedContact(prev => ({
+        setEditedContact((prev) => ({
           ...prev,
-          tags: [...currentTags, tagInput.trim()]
+          tags: [...currentTags, tagInput.trim()],
         }));
       }
       setTagInput('');
@@ -141,16 +145,16 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
   };
 
   const handleRemoveTag = (tagToRemove) => {
-    setEditedContact(prev => ({
+    setEditedContact((prev) => ({
       ...prev,
-      tags: (prev.tags || []).filter(tag => tag !== tagToRemove)
+      tags: (prev.tags || []).filter((tag) => tag !== tagToRemove),
     }));
   };
 
   const handleSave = () => {
     updateMutation.mutate({
       id: contact.id,
-      data: editedContact
+      data: editedContact,
     });
   };
 
@@ -158,13 +162,11 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       toast.error('Please upload an image file');
       return;
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error('Image size must be less than 5MB');
       return;
@@ -186,7 +188,7 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
 
       const imageUrl = response.data.secure_url;
       setProfileImage(imageUrl);
-      setEditedContact(prev => ({ ...prev, profile_picture: imageUrl }));
+      setEditedContact((prev) => ({ ...prev, profile_picture: imageUrl }));
       toast.success('Profile picture uploaded successfully!');
     } catch (error) {
       console.error('Upload error:', error);
@@ -211,9 +213,14 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
     }
   };
 
+  const resetEditing = () => {
+    setIsEditing(false);
+    setEditedContact(contact);
+    setProfileImage(contact.profile_picture || null);
+  };
+
   return (
     <>
-      {/* Backdrop */}
       <div
         className={`fixed inset-0 z-50 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${
           isClosing ? 'opacity-0' : 'opacity-100'
@@ -221,249 +228,283 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
         onClick={handleBackdropClick}
       />
 
-      {/* Slide Panel */}
-      <div className={`fixed top-0 right-0 z-50 h-full w-full md:w-1/2 bg-white dark:bg-gray-900 shadow-2xl transition-all duration-300 ease-out flex flex-col ${
-        isClosing ? 'translate-x-full' : 'translate-x-0'
-      }`}>
-        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-50/30 dark:bg-[#102431]/40 rounded-full blur-3xl -z-10" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-violet-50/20 dark:bg-[#0f1e2a]/40 rounded-full blur-3xl -z-10" />
+      <div
+        className={`fixed top-0 right-0 z-50 flex h-full w-full translate-x-0 flex-col bg-white shadow-2xl transition-all duration-300 ease-out dark:bg-[#0f141b] md:w-[52rem] ${
+          isClosing ? 'translate-x-full' : 'translate-x-0'
+        }`}
+      >
+        <div className="absolute right-0 top-0 -z-10 h-64 w-64 rounded-full bg-purple-50/30 blur-3xl dark:bg-[#0d2c3b]/30" />
+        <div className="absolute bottom-0 left-0 -z-10 h-48 w-48 rounded-full bg-violet-50/20 blur-3xl dark:bg-[#0d2230]/30" />
 
-        {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-purple-600 via-violet-600 to-purple-600 dark:from-[#1b232d] dark:via-[#1f2833] dark:to-[#1b232d] border-b dark:border-[#29556e] px-6 py-5 shadow-lg z-10 flex-shrink-0">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <User className="w-6 h-6 text-white" />
-              <h2 className="text-xl font-bold text-white">
-                {isEditing ? 'Edit Contact' : 'Contact Details'}
-              </h2>
+        <div className="sticky top-0 z-10 flex-shrink-0 border-b bg-gradient-to-r from-purple-600 via-violet-600 to-purple-600 px-6 py-5 shadow-lg dark:border-[#24465c] dark:from-[#131b23] dark:via-[#18222d] dark:to-[#131b23]">
+          <div className="w-full">
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <User className="h-6 w-6 text-white" />
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/65">User Directory</p>
+                  <h2 className="text-xl font-bold text-white">{isEditing ? 'Edit Contact' : 'Contact Details'}</h2>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {!isEditing && (
+                  <button
+                    onClick={() => toggleFavorite(contact.id)}
+                    className="rounded-full p-2 transition-all duration-200 hover:scale-110 hover:bg-white/20 active:scale-95"
+                    aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                  >
+                    <Star
+                      className={`h-5 w-5 transition-all ${
+                        isFavorite ? 'fill-amber-300 text-amber-300' : 'text-white/70 hover:text-white'
+                      }`}
+                    />
+                  </button>
+                )}
+                {!isEditing && isAuthenticated && (
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="flex items-center gap-2 rounded-lg bg-white/20 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-white/30"
+                    aria-label="Edit contact"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                    Edit
+                  </button>
+                )}
+                {isEditing && (
+                  <>
+                    <button
+                      onClick={handleSave}
+                      disabled={updateMutation.isLoading}
+                      className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-bold text-purple-600 transition-all duration-200 hover:bg-white/90 disabled:opacity-50 dark:text-[#0f6f9a]"
+                    >
+                      <Save className="h-4 w-4" />
+                      {updateMutation.isLoading ? 'Saving...' : 'Save'}
+                    </button>
+                    <button
+                      onClick={resetEditing}
+                      className="rounded-lg bg-white/20 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-white/30"
+                    >
+                      Cancel
+                    </button>
+                  </>
+                )}
+                <button
+                  onClick={handleClose}
+                  className="rounded-full p-2 transition-all duration-200 hover:scale-110 hover:bg-white/20 active:scale-95"
+                  aria-label="Close"
+                >
+                  <X className="h-6 w-6 text-white" />
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              {!isEditing && (
-                <button
-                  onClick={() => toggleFavorite(contact.id)}
-                  className="p-2 rounded-full hover:bg-white/20 transition-all duration-200 hover:scale-110 active:scale-95"
-                  aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-                >
-                  <Star
-                    className={`w-5 h-5 transition-all ${
-                      isFavorite ? 'fill-amber-300 text-amber-300 drop-shadow-glow' : 'text-white/70 hover:text-white'
-                    }`}
-                  />
-                </button>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {contact.is_ert && (
+                <div className="inline-flex items-center gap-1 rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white">
+                  <Shield className="h-3 w-3" />
+                  Emergency Response Team
+                </div>
               )}
-              {!isEditing && (
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-semibold"
-                  aria-label="Edit contact"
-                >
-                  <Edit2 className="w-4 h-4" />
-                  Edit
-                </button>
+              {contact.extension && (
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold text-white/90 backdrop-blur">
+                  <Phone className="h-3 w-3" />
+                  Ext. {contact.extension}
+                </div>
               )}
-              {isEditing && (
-                <>
-                  <button
-                    onClick={handleSave}
-                    disabled={updateMutation.isLoading}
-                    className="px-4 py-2 bg-white text-purple-600 dark:text-[#0f6f9a] hover:bg-white/90 rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-bold disabled:opacity-50"
-                  >
-                    <Save className="w-4 h-4" />
-                    {updateMutation.isLoading ? 'Saving...' : 'Save'}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsEditing(false);
-                      setEditedContact(contact);
-                      setProfileImage(contact.profile_picture || null);
-                    }}
-                    className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-all duration-200 text-sm font-semibold"
-                  >
-                    Cancel
-                  </button>
-                </>
+              {contact.department && (
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold text-white/90 backdrop-blur">
+                  <MapPin className="h-3 w-3" />
+                  {contact.department}
+                </div>
               )}
-              <button
-                onClick={handleClose}
-                className="p-2 rounded-full hover:bg-white/20 transition-all duration-200 hover:scale-110 active:scale-95"
-                aria-label="Close"
-              >
-                <X className="w-6 h-6 text-white" />
-              </button>
             </div>
           </div>
-          {contact.is_ert && (
-            <div className="inline-flex items-center gap-1 px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full">
-              <Shield className="w-3 h-3" />
-              Emergency Response Team
-            </div>
-          )}
         </div>
 
-        {/* Content - Scrollable with Two Column Layout */}
         <div className="flex-1 overflow-y-auto px-6 py-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column - Profile and Main Info (2/3 width) */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Profile Picture Section */}
-              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 bg-gradient-to-br from-purple-50 via-white to-violet-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-750 p-4 sm:p-6 rounded-2xl border-2 border-purple-200 dark:border-[#29556e] shadow-lg dark:shadow-black/30">
-                <div className="relative flex-shrink-0">
-                  <div className="w-32 h-32 sm:w-48 sm:h-48 rounded-2xl bg-gradient-to-br from-purple-400 via-violet-400 to-fuchsia-400 dark:from-[#23b7f2] dark:via-[#1296e2] dark:to-[#0d6fb0] p-1 shadow-xl">
-                    <div className="w-full h-full rounded-xl bg-white flex items-center justify-center overflow-hidden">
-                      {profileImage ? (
-                        <img src={profileImage} alt={editedContact.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-purple-100 to-violet-100 flex items-center justify-center">
-                          <User className="w-16 h-16 sm:w-24 sm:h-24 text-purple-400" />
-                        </div>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div className="space-y-6 lg:col-span-2">
+              <div className="rounded-3xl border border-purple-200/80 bg-gradient-to-br from-purple-50 via-white to-violet-50 p-4 shadow-lg shadow-purple-100/50 dark:border-[#24465c] dark:bg-[linear-gradient(135deg,rgba(22,30,39,0.98),rgba(15,20,27,0.98))] dark:shadow-[0_22px_40px_rgba(2,6,23,0.35)] sm:p-6">
+                <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
+                  <div className="relative flex-shrink-0">
+                    <div className="h-32 w-32 rounded-[1.7rem] bg-gradient-to-br from-purple-400 via-violet-400 to-fuchsia-400 p-1 shadow-xl dark:from-[#23b7f2] dark:via-[#1598df] dark:to-[#0d6fb0] sm:h-44 sm:w-44">
+                      <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-[1.45rem] bg-white dark:bg-[#0e141b]">
+                        {profileImage ? (
+                          <img src={profileImage} alt={editedContact.name} className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-purple-100 to-violet-100 dark:from-[#163243] dark:to-[#1a2230]">
+                            <User className="h-16 w-16 text-purple-400 dark:text-[#7eddff] sm:h-24 sm:w-24" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="w-full flex-1 text-center sm:text-left">
+                    {isEditing ? (
+                      <div className="space-y-4">
+                        <input
+                          type="text"
+                          value={editedContact.name || ''}
+                          onChange={(e) => handleInputChange('name', e.target.value)}
+                          className="w-full border-b-2 border-purple-300 bg-transparent py-2 text-xl font-bold text-gray-900 outline-none focus:border-purple-600 dark:border-[#29556e] dark:text-white dark:focus:border-[#23b7f2] sm:text-2xl"
+                          placeholder="Contact Name"
+                        />
+                        <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-purple-200 bg-white px-4 py-2 text-sm font-semibold text-purple-700 shadow-sm transition-colors hover:bg-purple-50 dark:border-[#29556e] dark:bg-[#13222d] dark:text-[#7eddff] dark:hover:bg-[#183040]">
+                          <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                          {isUploadingImage ? 'Uploading...' : 'Upload Photo'}
+                        </label>
+                      </div>
+                    ) : (
+                      <>
+                        <h3 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+                          {contact.name}
+                        </h3>
+                        <p className="mt-3 text-base font-semibold text-purple-600 dark:text-slate-200 sm:text-lg">
+                          {contact.designation || 'No designation assigned'}
+                        </p>
+                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                          {contact.company || 'No company listed'}
+                        </p>
+                      </>
+                    )}
+
+                    <div className="mt-4 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+                      {contact.department && (
+                        <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-purple-200 bg-white/80 px-3 py-1.5 text-sm font-medium text-slate-600 shadow-sm dark:border-[#29556e] dark:bg-[#13222d] dark:text-slate-200">
+                          <MapPin className="h-3.5 w-3.5 shrink-0 text-purple-500 dark:text-[#69d6ff]" />
+                          <span className="truncate">{contact.department}</span>
+                        </span>
+                      )}
+                      {contact.email && (
+                        <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-purple-200 bg-white/80 px-3 py-1.5 text-sm font-medium text-slate-600 shadow-sm dark:border-[#29556e] dark:bg-[#13222d] dark:text-slate-200 sm:max-w-[24rem]">
+                          <Mail className="h-3.5 w-3.5 shrink-0 text-purple-500 dark:text-[#69d6ff]" />
+                          <span className="truncate">{contact.email}</span>
+                        </span>
                       )}
                     </div>
                   </div>
                 </div>
-                <div className="flex-1 w-full text-center sm:text-left">
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={editedContact.name || ''}
-                      onChange={(e) => handleInputChange('name', e.target.value)}
-                      className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white border-b-2 border-purple-300 dark:border-[#29556e] focus:border-purple-600 dark:focus:border-[#23b7f2] outline-none bg-transparent w-full py-2"
-                      placeholder="Contact Name"
-                    />
-                  ) : (
-                    <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{contact.name}</h3>
-                  )}
-                  {!isEditing && contact.designation && (
-                    <p className="text-purple-600 dark:text-[#69d6ff] font-semibold text-base sm:text-lg mt-1">{contact.designation}</p>
-                  )}
-                  {!isEditing && contact.department && (
-                    <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">📍 {contact.department}</p>
-                  )}
-                </div>
               </div>
 
-              {/* Form Fields */}
               <div className="space-y-6">
-            {/* Professional Details */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold text-purple-900 dark:text-[#69d6ff] border-b-2 border-purple-200 dark:border-[#29556e] pb-2">Professional Details</h3>
-              <InputField
-                icon={Briefcase}
-                label="Designation"
-                value={editedContact.designation}
-                onChange={(val) => handleInputChange('designation', val)}
-                placeholder="e.g. Senior Manager"
-                isEditing={isEditing}
-              />
-              <InputField
-                icon={Building2}
-                label="Department"
-                value={editedContact.department}
-                onChange={(val) => handleInputChange('department', val)}
-                placeholder="e.g. Sales"
-                isEditing={isEditing}
-              />
-              <InputField
-                icon={Building2}
-                label="Company"
-                value={editedContact.company}
-                onChange={(val) => handleInputChange('company', val)}
-                placeholder="e.g. Fairmont The Palm"
-                isEditing={isEditing}
-              />
-            </div>
+                <SectionCard title="Professional Details" description="Role, department, and company information." icon={Briefcase}>
+                  <div className="space-y-4">
+                    <InputField
+                      icon={Briefcase}
+                      label="Designation"
+                      value={editedContact.designation}
+                      onChange={(val) => handleInputChange('designation', val)}
+                      placeholder="e.g. Senior Manager"
+                      isEditing={isEditing}
+                    />
+                    <InputField
+                      icon={Building2}
+                      label="Department"
+                      value={editedContact.department}
+                      onChange={(val) => handleInputChange('department', val)}
+                      placeholder="e.g. Sales"
+                      isEditing={isEditing}
+                    />
+                    <InputField
+                      icon={Building2}
+                      label="Company"
+                      value={editedContact.company}
+                      onChange={(val) => handleInputChange('company', val)}
+                      placeholder="e.g. Fairmont The Palm"
+                      isEditing={isEditing}
+                    />
+                  </div>
+                </SectionCard>
 
-            {/* Contact Information */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold text-purple-900 dark:text-[#69d6ff] border-b-2 border-purple-200 dark:border-[#29556e] pb-2">Contact Information</h3>
-              <InputField
-                icon={Mail}
-                label="Email"
-                type="email"
-                value={editedContact.email}
-                onChange={(val) => handleInputChange('email', val)}
-                placeholder="email@example.com"
-                isEditing={isEditing}
-              />
-              <InputField
-                icon={Phone}
-                label="Mobile"
-                type="tel"
-                value={editedContact.mobile}
-                onChange={(val) => handleInputChange('mobile', val)}
-                placeholder="+971 50 123 4567"
-                isEditing={isEditing}
-              />
-              <InputField
-                icon={Phone}
-                label="Landline"
-                type="tel"
-                value={editedContact.landline}
-                onChange={(val) => handleInputChange('landline', val)}
-                placeholder="+971 4 457 3388"
-                isEditing={isEditing}
-              />
-              <InputField
-                icon={Phone}
-                label="Extension"
-                value={editedContact.extension}
-                onChange={(val) => handleInputChange('extension', val)}
-                placeholder="3301"
-                isEditing={isEditing}
-              />
-              <InputField
-                icon={Globe}
-                label="Website"
-                type="url"
-                value={editedContact.website}
-                onChange={(val) => handleInputChange('website', val)}
-                placeholder="https://example.com"
-                isEditing={isEditing}
-              />
-            </div>
+                <SectionCard title="Contact Channels" description="Primary ways to reach this contact." icon={Phone}>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="md:col-span-2">
+                      <InputField
+                        icon={Mail}
+                        label="Email"
+                        type="email"
+                        value={editedContact.email}
+                        onChange={(val) => handleInputChange('email', val)}
+                        placeholder="email@example.com"
+                        isEditing={isEditing}
+                      />
+                    </div>
+                    <InputField
+                      icon={Phone}
+                      label="Mobile"
+                      type="tel"
+                      value={editedContact.mobile}
+                      onChange={(val) => handleInputChange('mobile', val)}
+                      placeholder="+971 50 123 4567"
+                      isEditing={isEditing}
+                    />
+                    <InputField
+                      icon={Phone}
+                      label="Landline"
+                      type="tel"
+                      value={editedContact.landline}
+                      onChange={(val) => handleInputChange('landline', val)}
+                      placeholder="+971 4 457 3388"
+                      isEditing={isEditing}
+                    />
+                    <InputField
+                      icon={Phone}
+                      label="Extension"
+                      value={editedContact.extension}
+                      onChange={(val) => handleInputChange('extension', val)}
+                      placeholder="3301"
+                      isEditing={isEditing}
+                    />
+                    <div className="md:col-span-2">
+                      <InputField
+                        icon={Globe}
+                        label="Website"
+                        type="url"
+                        value={editedContact.website}
+                        onChange={(val) => handleInputChange('website', val)}
+                        placeholder="https://example.com"
+                        isEditing={isEditing}
+                      />
+                    </div>
+                  </div>
+                </SectionCard>
 
-            {/* Languages */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold text-purple-900 dark:text-[#69d6ff] border-b-2 border-purple-200 dark:border-[#29556e] pb-2">Languages</h3>
-              <div className="space-y-2">
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={editedContact.languages?.join(', ') || ''}
-                    onChange={(e) => handleArrayChange('languages', e.target.value)}
-                    placeholder="English, Arabic, French (comma separated)"
-                    className="w-full px-4 py-3 border-2 border-purple-200 dark:border-[#29556e] bg-white dark:bg-gray-800 rounded-lg focus:border-purple-500 dark:focus:border-[#23b7f2] focus:ring-2 focus:ring-purple-200 dark:focus:ring-[#23b7f2]/20 outline-none transition-all text-gray-900 dark:text-gray-100"
-                  />
-                ) : (
-                  <div className="flex flex-wrap gap-2">
-                    {editedContact.languages && editedContact.languages.length > 0 ? (
-                      editedContact.languages.map((lang, index) => (
-                        <span
-                          key={index}
-                          className="px-3 py-1.5 bg-gradient-to-r from-purple-100 to-violet-100 dark:from-[#102431] dark:to-[#0f1e2a] border border-purple-200 dark:border-[#29556e] text-purple-700 dark:text-[#7eddff] rounded-full text-sm font-bold"
-                        >
-                          {lang}
-                        </span>
-                      ))
+                <SectionCard title="Languages" description="Spoken or supported languages." icon={Globe}>
+                  <div className="space-y-2">
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={editedContact.languages?.join(', ') || ''}
+                        onChange={(e) => handleArrayChange('languages', e.target.value)}
+                        placeholder="English, Arabic, French"
+                        className="w-full rounded-xl border-2 border-purple-200 bg-white px-4 py-3 text-gray-900 outline-none transition-all focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:border-[#29556e] dark:bg-[#17212c] dark:text-gray-100 dark:focus:border-[#23b7f2] dark:focus:ring-[#23b7f2]/20"
+                      />
                     ) : (
-                      <p className="text-gray-500 dark:text-gray-400 px-4 py-3 bg-purple-50/50 dark:bg-[#102431] rounded-lg border border-purple-100 dark:border-[#29556e]">No languages specified</p>
+                      <div className="flex flex-wrap gap-2">
+                        {editedContact.languages && editedContact.languages.length > 0 ? (
+                          editedContact.languages.map((lang, index) => (
+                            <span
+                              key={index}
+                              className="rounded-full border border-purple-200 bg-gradient-to-r from-purple-100 to-violet-100 px-3 py-1.5 text-sm font-bold text-purple-700 dark:border-[#29556e] dark:bg-[linear-gradient(90deg,rgba(16,36,49,0.95),rgba(15,30,42,0.95))] dark:text-[#7eddff]"
+                            >
+                              {lang}
+                            </span>
+                          ))
+                        ) : (
+                          <p className="rounded-xl border border-purple-100 bg-purple-50/60 px-4 py-3 text-slate-500 dark:border-[#29556e] dark:bg-[#102431] dark:text-slate-400">
+                            No languages specified
+                          </p>
+                        )}
+                      </div>
                     )}
                   </div>
-                )}
+                </SectionCard>
               </div>
             </div>
-          </div>
-        </div>
 
-            {/* Right Column - Tags & Comments (1/3 width) */}
-            <div className="lg:col-span-1 space-y-6">
-              {/* Tags Section */}
-              <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border-2 border-purple-200 dark:border-[#29556e] shadow-lg h-fit">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="p-2 bg-purple-100 dark:bg-[#102431] rounded-lg">
-                    <Tag className="w-5 h-5 text-purple-600 dark:text-[#69d6ff]" />
-                  </div>
-                  <h3 className="text-sm font-bold text-purple-900 dark:text-[#69d6ff] uppercase tracking-wide">Tags</h3>
-                </div>
+            <div className="space-y-6 lg:col-span-1">
+              <SectionCard title="Tags" description="Keywords used to group and filter contacts." icon={Tag}>
                 {isEditing ? (
                   <div className="space-y-3">
                     <input
@@ -472,27 +513,27 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
                       onChange={(e) => setTagInput(e.target.value)}
                       onKeyDown={handleAddTag}
                       placeholder="Type a tag and press Enter..."
-                      className="w-full px-4 py-3 border-2 border-purple-200 dark:border-[#29556e] bg-white dark:bg-gray-700 rounded-lg focus:border-purple-500 dark:focus:border-[#23b7f2] focus:ring-2 focus:ring-purple-200 dark:focus:ring-[#23b7f2]/20 outline-none transition-all text-sm text-gray-900 dark:text-gray-100"
+                      className="w-full rounded-xl border-2 border-purple-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition-all focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:border-[#29556e] dark:bg-[#17212c] dark:text-gray-100 dark:focus:border-[#23b7f2] dark:focus:ring-[#23b7f2]/20"
                     />
                     <div className="flex flex-wrap gap-2">
                       {editedContact.tags && editedContact.tags.length > 0 ? (
                         editedContact.tags.map((tag, index) => (
                           <span
                             key={index}
-                          className="group inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 dark:bg-gray-700 border border-purple-200 dark:border-gray-600 text-purple-700 dark:text-gray-100 rounded-full text-sm font-medium hover:bg-purple-200 dark:hover:bg-gray-600 transition-colors"
+                            className="group inline-flex items-center gap-1.5 rounded-full border border-purple-200 bg-purple-100 px-3 py-1.5 text-sm font-medium text-purple-700 transition-colors hover:bg-purple-200 dark:border-[#29556e] dark:bg-[#1d2b37] dark:text-slate-100 dark:hover:bg-[#253645]"
                           >
                             {tag}
                             <button
                               onClick={() => handleRemoveTag(tag)}
-                              className="hover:bg-purple-300 dark:hover:bg-gray-500 rounded-full p-0.5 transition-colors"
+                              className="rounded-full p-0.5 transition-colors hover:bg-purple-300 dark:hover:bg-[#34485c]"
                               aria-label={`Remove ${tag}`}
                             >
-                              <X className="w-3 h-3" />
+                              <X className="h-3 w-3" />
                             </button>
                           </span>
                         ))
                       ) : (
-                        <p className="text-sm text-gray-400 italic">No tags yet. Press Enter to add.</p>
+                        <p className="text-sm italic text-gray-400">No tags yet. Press Enter to add.</p>
                       )}
                     </div>
                   </div>
@@ -502,42 +543,35 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
                       editedContact.tags.map((tag, index) => (
                         <span
                           key={index}
-                          className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-100 rounded-full text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                          className="rounded-full border border-gray-200 bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 dark:border-[#334252] dark:bg-[#253240] dark:text-slate-100 dark:hover:bg-[#314252]"
                         >
                           {tag}
                         </span>
                       ))
                     ) : (
-                      <p className="text-sm text-gray-400 italic">No tags</p>
+                      <p className="text-sm italic text-gray-400">No tags</p>
                     )}
                   </div>
                 )}
-              </div>
+              </SectionCard>
 
-              {/* Comments Section */}
-              <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border-2 border-purple-200 dark:border-[#29556e] shadow-lg">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="p-2 bg-purple-100 dark:bg-[#102431] rounded-lg">
-                    <MessageSquare className="w-5 h-5 text-purple-600 dark:text-[#69d6ff]" />
-                  </div>
-                  <h3 className="text-sm font-bold text-purple-900 dark:text-[#69d6ff] uppercase tracking-wide">Comments</h3>
-                </div>
+              <SectionCard title="Comments" description="Operational notes and additional context." icon={MessageSquare}>
                 {isEditing ? (
                   <textarea
                     value={editedContact.comments || ''}
                     onChange={(e) => handleInputChange('comments', e.target.value)}
                     placeholder="Additional notes or comments..."
-                    rows={6}
-                    className="w-full px-4 py-3 border-2 border-purple-200 dark:border-[#29556e] bg-white dark:bg-gray-700 rounded-lg focus:border-purple-500 dark:focus:border-[#23b7f2] focus:ring-2 focus:ring-purple-200 dark:focus:ring-[#23b7f2]/20 outline-none transition-all text-sm text-gray-900 dark:text-gray-100 resize-none"
+                    rows={8}
+                    className="w-full resize-none rounded-xl border-2 border-purple-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition-all focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:border-[#29556e] dark:bg-[#17212c] dark:text-gray-100 dark:focus:border-[#23b7f2] dark:focus:ring-[#23b7f2]/20"
                   />
                 ) : (
-                  <div className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-gray-700 dark:to-gray-700 rounded-lg p-4 border border-purple-100 dark:border-gray-600 min-h-[150px]">
-                    <p className="text-sm text-gray-700 dark:text-gray-100 leading-relaxed whitespace-pre-wrap">
-                      {editedContact.comments || <span className="text-gray-400 italic">No comments</span>}
+                  <div className="min-h-[180px] rounded-xl border border-purple-100 bg-gradient-to-br from-purple-50 to-violet-50 p-4 dark:border-[#29556e] dark:bg-[linear-gradient(135deg,rgba(31,44,57,0.95),rgba(42,54,71,0.95))]">
+                    <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-700 dark:text-gray-100">
+                      {editedContact.comments || <span className="italic text-gray-400">No comments</span>}
                     </p>
                   </div>
                 )}
-              </div>
+              </SectionCard>
             </div>
           </div>
         </div>
