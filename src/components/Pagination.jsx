@@ -153,7 +153,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
               className={`
                 min-w-[28px] sm:min-w-[38px] h-[28px] sm:h-[38px] px-1 sm:px-2.5 py-0.5 sm:py-1.5 rounded text-xs sm:text-sm font-semibold transition-all duration-200 border-2
                 ${isActive
-                  ? 'bg-gradient-to-br from-purple-500 to-violet-500 text-white border-purple-600 dark:border-accent-500 shadow-lg shadow-purple-200 dark:shadow-accent-900/30 scale-105'
+                  ? 'bg-gradient-to-br from-purple-500 to-violet-500 dark:from-accent-600 dark:to-accent-700 text-white border-purple-600 dark:border-accent-500 shadow-lg shadow-purple-200 dark:shadow-accent-900/30 scale-105'
                   : 'text-purple-700 dark:text-accent-300 border-purple-200 dark:border-accent-700 bg-white dark:bg-gray-800 hover:bg-purple-50 dark:hover:bg-gray-700 hover:border-purple-400 dark:hover:border-accent-500 hover:shadow-md hover:scale-105 active:scale-95'
                 }
               `}

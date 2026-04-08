@@ -309,7 +309,7 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
               {/* Profile Picture Section */}
               <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 bg-gradient-to-br from-purple-50 via-white to-violet-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-750 p-4 sm:p-6 rounded-2xl border-2 border-purple-200 dark:border-accent-700/50 shadow-lg dark:shadow-black/30">
                 <div className="relative flex-shrink-0">
-                  <div className="w-32 h-32 sm:w-48 sm:h-48 rounded-2xl bg-gradient-to-br from-purple-400 via-violet-400 to-fuchsia-400 p-1 shadow-xl">
+                  <div className="w-32 h-32 sm:w-48 sm:h-48 rounded-2xl bg-gradient-to-br from-purple-400 via-violet-400 to-fuchsia-400 dark:from-accent-400 dark:via-accent-500 dark:to-accent-600 p-1 shadow-xl">
                     <div className="w-full h-full rounded-xl bg-white flex items-center justify-center overflow-hidden">
                       {profileImage ? (
                         <img src={profileImage} alt={editedContact.name} className="w-full h-full object-cover" />
