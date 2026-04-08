@@ -137,3 +137,27 @@ export const uploadProfilePicture = (contactId, file) => {
     },
   });
 };
+
+export const getAdminTaxonomy = (taxonomyType) => {
+  return api.get(`/api/admin/taxonomy/${taxonomyType}`);
+};
+
+export const createAdminTaxonomy = (taxonomyType, name) => {
+  return api.post(`/api/admin/taxonomy/${taxonomyType}`, { name });
+};
+
+export const renameAdminTaxonomy = (taxonomyType, currentName, newName) => {
+  return api.patch(`/api/admin/taxonomy/${taxonomyType}`, {
+    current_name: currentName,
+    new_name: newName,
+  });
+};
+
+export const deleteAdminTaxonomy = (taxonomyType, name, replacementName = null) => {
+  return api.delete(`/api/admin/taxonomy/${taxonomyType}`, {
+    data: {
+      name,
+      replacement_name: replacementName,
+    },
+  });
+};

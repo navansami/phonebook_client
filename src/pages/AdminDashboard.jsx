@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -64,10 +64,16 @@ const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState('overview');
   const [adminFilter, setAdminFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [settingsSearchTerm, setSettingsSearchTerm] = useState('');
   const [sortColumn, setSortColumn] = useState('name');
   const [sortDirection, setSortDirection] = useState('asc');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  const [selectedTaxonomy, setSelectedTaxonomy] = useState('departments');
+  const [newTaxonomyName, setNewTaxonomyName] = useState('');
+  const [selectedTaxonomyItem, setSelectedTaxonomyItem] = useState(null);
+  const [renameTaxonomyName, setRenameTaxonomyName] = useState('');
+  const [replacementTaxonomyName, setReplacementTaxonomyName] = useState('');
 
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -92,6 +98,18 @@ const AdminDashboard = () => {
     onError: (err) => {
       toast.error(err.response?.data?.message || 'Failed to fetch contacts');
     },
+  });
+
+  const {
+    data: taxonomyInventoryData,
+    isLoading: isTaxonomyLoading,
+  } = useQuery({
+    queryKey: ['admin-taxonomy', selectedTaxonomy],
+    queryFn: async () => {
+      const response = await contactsApi.getAdminTaxonomy(selectedTaxonomy);
+      return response.data;
+    },
+    enabled: activeSection === 'settings',
   });
 
   const createMutation = useMutation({
@@ -174,6 +192,50 @@ const AdminDashboard = () => {
     },
     onError: (err) => {
       toast.error(err.response?.data?.message || 'Failed to update third party status');
+    },
+  });
+
+  const createTaxonomyMutation = useMutation({
+    mutationFn: ({ taxonomyType, name }) => contactsApi.createAdminTaxonomy(taxonomyType, name),
+    onSuccess: (response) => {
+      queryClient.invalidateQueries(['admin-taxonomy']);
+      toast.success(response.data?.message || 'Taxonomy value created successfully');
+      setNewTaxonomyName('');
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.detail || 'Failed to create taxonomy value');
+    },
+  });
+
+  const renameTaxonomyMutation = useMutation({
+    mutationFn: ({ taxonomyType, currentName, newName }) =>
+      contactsApi.renameAdminTaxonomy(taxonomyType, currentName, newName),
+    onSuccess: (response) => {
+      queryClient.invalidateQueries(['admin-taxonomy']);
+      queryClient.invalidateQueries(['admin-contacts']);
+      toast.success(response.data?.message || 'Taxonomy value updated successfully');
+      setSelectedTaxonomyItem(null);
+      setRenameTaxonomyName('');
+      setReplacementTaxonomyName('');
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.detail || 'Failed to update taxonomy value');
+    },
+  });
+
+  const deleteTaxonomyMutation = useMutation({
+    mutationFn: ({ taxonomyType, name, replacementName }) =>
+      contactsApi.deleteAdminTaxonomy(taxonomyType, name, replacementName),
+    onSuccess: (response) => {
+      queryClient.invalidateQueries(['admin-taxonomy']);
+      queryClient.invalidateQueries(['admin-contacts']);
+      toast.success(response.data?.message || 'Taxonomy value removed successfully');
+      setSelectedTaxonomyItem(null);
+      setRenameTaxonomyName('');
+      setReplacementTaxonomyName('');
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.detail || 'Failed to remove taxonomy value');
     },
   });
 
@@ -325,6 +387,40 @@ const AdminDashboard = () => {
   ];
 
   const activeSectionMeta = ADMIN_SECTIONS.find((section) => section.id === activeSection);
+  const selectedTaxonomyMeta = taxonomyCards.find((item) => item.id === selectedTaxonomy) || taxonomyCards[0];
+  const selectedTaxonomySingularLabel = {
+    departments: 'Department',
+    companies: 'Company',
+    designations: 'Designation',
+    tags: 'Tag',
+    languages: 'Language',
+  }[selectedTaxonomy] || 'Value';
+
+  const taxonomyCoverage = useMemo(() => {
+    const total = dashboardMetrics.total || 1;
+    return {
+      departments: dashboardMetrics.total - dashboardMetrics.missingDepartment,
+      companies: dashboardMetrics.total - dashboardMetrics.missingCompany,
+      designations: dashboardMetrics.total - dashboardMetrics.missingDesignation,
+      tags: allContacts.filter((contact) => (contact.tags || []).length > 0).length,
+      languages: allContacts.filter((contact) => (contact.languages || []).length > 0).length,
+      total,
+    };
+  }, [allContacts, dashboardMetrics]);
+
+  const filteredTaxonomyItems = useMemo(() => {
+    const items = taxonomyInventoryData?.items || [];
+    if (!settingsSearchTerm.trim()) return items;
+    const query = settingsSearchTerm.toLowerCase();
+    return items.filter((item) => item.name.toLowerCase().includes(query));
+  }, [taxonomyInventoryData, settingsSearchTerm]);
+
+  useEffect(() => {
+    setSelectedTaxonomyItem(null);
+    setRenameTaxonomyName('');
+    setReplacementTaxonomyName('');
+    setSettingsSearchTerm('');
+  }, [selectedTaxonomy]);
 
   const handleSort = (column) => {
     if (sortColumn === column) {
@@ -394,6 +490,51 @@ const AdminDashboard = () => {
     window.open('/', '_blank');
   };
 
+  const handleOpenTaxonomyInContacts = (taxonomyType, value) => {
+    const searchPrefixes = {
+      departments: value,
+      companies: value,
+      designations: value,
+      tags: value,
+      languages: value,
+    };
+
+    setActiveSection('contacts');
+    setAdminFilter('all');
+    setCurrentPage(1);
+    setSearchTerm(searchPrefixes[taxonomyType] || value);
+  };
+
+  const handleCreateTaxonomy = () => {
+    const nextName = newTaxonomyName.trim();
+    if (!nextName) return;
+    createTaxonomyMutation.mutate({ taxonomyType: selectedTaxonomy, name: nextName });
+  };
+
+  const handleSelectTaxonomyItem = (item) => {
+    setSelectedTaxonomyItem(item);
+    setRenameTaxonomyName(item.name);
+    setReplacementTaxonomyName('');
+  };
+
+  const handleRenameTaxonomy = () => {
+    if (!selectedTaxonomyItem || !renameTaxonomyName.trim()) return;
+    renameTaxonomyMutation.mutate({
+      taxonomyType: selectedTaxonomy,
+      currentName: selectedTaxonomyItem.name,
+      newName: renameTaxonomyName.trim(),
+    });
+  };
+
+  const handleDeleteTaxonomy = () => {
+    if (!selectedTaxonomyItem) return;
+    deleteTaxonomyMutation.mutate({
+      taxonomyType: selectedTaxonomy,
+      name: selectedTaxonomyItem.name,
+      replacementName: replacementTaxonomyName.trim() || null,
+    });
+  };
+
   const SortIcon = ({ column }) => {
     if (sortColumn !== column) return null;
     return sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />;
@@ -443,10 +584,7 @@ const AdminDashboard = () => {
       <div className="mx-auto flex min-h-screen max-w-[1680px] gap-6 px-4 py-5 sm:px-6 lg:px-8">
         <aside className="w-full lg:sticky lg:top-5 lg:h-[calc(100vh-2.5rem)] lg:w-[272px] lg:flex-shrink-0">
           <div className="flex h-full flex-col overflow-y-auto rounded-[30px] border border-[#20384d] bg-gradient-to-b from-[#102234] via-[#151f31] to-[#1b2130] p-3.5 text-white shadow-[0_20px_60px_rgba(8,16,30,0.32)]">
-            <div className="mb-4 flex items-center gap-3 rounded-[22px] border border-white/8 bg-[#ffffff08] px-3.5 py-3.5">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#67e8f9] via-[#38bdf8] to-[#22c55e] text-sm font-bold text-[#082032] shadow-lg shadow-cyan-500/20">
-                FP
-              </div>
+            <div className="mb-4 rounded-[22px] border border-white/8 bg-[#ffffff08] px-4 py-3.5">
               <div>
                 <div className="text-[10px] font-semibold uppercase tracking-[0.34em] text-[#89a9be]">Control Center</div>
                 <div className="text-[26px] font-semibold leading-none text-white">Phonebook</div>
@@ -501,16 +639,18 @@ const AdminDashboard = () => {
 
             <div className="mt-auto pt-3">
               <div className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-[0.34em] text-[#89a9be]">Actions</div>
-              <div className="space-y-1.5 rounded-[22px] border border-white/8 bg-[#ffffff08] p-2">
+              <div className="space-y-1 rounded-[20px] border border-white/8 bg-[#ffffff08] p-2">
               <button
                 onClick={handleOpenPhonebook}
-                className="flex w-full items-center justify-between gap-2.5 rounded-[16px] border border-white/8 bg-[#ffffff08] px-3 py-2.5 text-left text-white transition-colors hover:bg-[#ffffff10]"
+                className="flex w-full items-center justify-between gap-2 rounded-[14px] px-2.5 py-2 text-left text-white transition-colors hover:bg-[#ffffff10]"
               >
                 <span className="flex items-center gap-3">
-                  <BookOpen className="h-4.5 w-4.5 flex-shrink-0 text-[#88e0f5]" />
+                  <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-[#ffffff08]">
+                    <BookOpen className="h-4 w-4 text-[#88e0f5]" />
+                  </span>
                   <span className="min-w-0">
                     <span className="block text-[13px] font-semibold leading-tight">Open Phonebook</span>
-                    <span className="block text-[12px] leading-tight text-[#8fb0c2]">Preview public directory</span>
+                    <span className="block text-[11px] leading-tight text-[#8fb0c2]">Preview public directory</span>
                   </span>
                 </span>
                 <ExternalLink className="h-3.5 w-3.5 flex-shrink-0 text-[#88e0f5]" />
@@ -518,14 +658,14 @@ const AdminDashboard = () => {
 
               <button
                 onClick={handleLogout}
-                className="flex w-full items-center gap-2.5 rounded-[16px] border border-white/8 bg-[#ffffff08] px-3 py-2.5 text-left text-white transition-colors hover:bg-[#ffffff10]"
+                className="flex w-full items-center gap-2 rounded-[14px] px-2.5 py-2 text-left text-white transition-colors hover:bg-[#ffffff10]"
               >
-                <span className="flex h-8.5 w-8.5 flex-shrink-0 items-center justify-center rounded-2xl bg-[#ffffff08] text-[#f8c3cb]">
-                  <LogOut className="h-4 w-4" />
+                <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-[#ffffff08] text-[#f8c3cb]">
+                  <LogOut className="h-3.5 w-3.5" />
                 </span>
                 <span className="min-w-0">
                   <span className="block text-[13px] font-semibold leading-tight">Sign out</span>
-                  <span className="block text-[12px] leading-tight text-[#8fb0c2]">End this admin session</span>
+                  <span className="block text-[11px] leading-tight text-[#8fb0c2]">End this admin session</span>
                 </span>
               </button>
               </div>
@@ -622,15 +762,15 @@ const AdminDashboard = () => {
                       return (
                         <div
                           key={alert.id}
-                          className="rounded-2xl border border-amber-200 bg-amber-50/80 p-4 dark:border-amber-900/30 dark:bg-amber-900/10"
+                          className="rounded-2xl border border-sky-100 bg-sky-50/70 p-4 dark:border-[#21415a] dark:bg-[#102431]/70"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="rounded-xl bg-amber-100 p-2 dark:bg-amber-900/30">
-                              <Icon className="h-4 w-4 text-amber-700 dark:text-amber-300" />
+                            <div className="rounded-xl bg-sky-100 p-2 dark:bg-[#143040]">
+                              <Icon className="h-4 w-4 text-sky-700 dark:text-[#7fdcff]" />
                             </div>
                             <div>
-                              <div className="text-lg font-bold text-amber-900 dark:text-amber-200">{alert.count}</div>
-                              <div className="text-sm text-amber-800 dark:text-amber-300">{alert.label}</div>
+                              <div className="text-lg font-bold text-slate-900 dark:text-white">{alert.count}</div>
+                              <div className="text-sm text-slate-700 dark:text-slate-300">{alert.label}</div>
                             </div>
                           </div>
                         </div>
@@ -811,7 +951,7 @@ const AdminDashboard = () => {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 bg-white dark:divide-[#243244] dark:bg-[#121a23]">
+                  <tbody className="bg-white dark:bg-[#121a23]">
                     {paginatedContacts.length === 0 ? (
                       <tr>
                         <td colSpan="7" className="px-4 py-12 text-center">
@@ -826,90 +966,107 @@ const AdminDashboard = () => {
                       </tr>
                     ) : (
                       paginatedContacts.map((contact) => (
-                        <tr key={contact.id} className="transition-colors hover:bg-gray-50 dark:hover:bg-[#17212c]">
-                          <td className="px-3 py-3">
+                        <tr key={contact.id} className="border-b border-gray-200/80 align-top transition-colors hover:bg-gray-50/80 dark:border-[#243244] dark:hover:bg-[#17212c]">
+                          <td className="px-3 py-4">
                             {contact.profile_picture ? (
                               <img
                                 src={contact.profile_picture}
                                 alt={contact.name}
-                                className="w-10 h-10 rounded-full object-cover border-2 border-indigo-100 dark:border-[#29556e]"
+                                className="w-11 h-11 rounded-full object-cover border-2 border-indigo-100 dark:border-[#29556e]"
                               />
                             ) : (
-                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-[#102431] dark:to-[#183446] flex items-center justify-center">
+                              <div className="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-[#102431] dark:to-[#183446] flex items-center justify-center">
                                 <User className="w-5 h-5 text-indigo-400 dark:text-[#7fdcff]" />
                               </div>
                             )}
                           </td>
-                          <td className="px-3 py-3">
-                            <div className="text-sm font-semibold text-gray-900 dark:text-white truncate">{contact.name}</div>
-                            <div className="mt-1 text-xs text-gray-500 dark:text-gray-400 truncate">{contact.email || contact.mobile || 'No direct contact'}</div>
-                          </td>
-                          <td className="px-3 py-3 text-sm text-gray-700 dark:text-gray-200 truncate">{contact.designation || '-'}</td>
-                          <td className="px-3 py-3">
-                            <div className="text-sm text-gray-700 dark:text-gray-200 truncate">{contact.department || '-'}</div>
-                            <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">{contact.extension ? `Ext: ${contact.extension}` : 'No extension'}</div>
-                          </td>
-                          <td className="px-3 py-3 text-sm text-gray-700 dark:text-gray-200 truncate">{contact.company || '-'}</td>
-                          <td className="px-3 py-3">
-                            <div className="flex flex-wrap gap-1.5">
-                              <button
-                                onClick={() => handleToggleERT(contact)}
-                                className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
-                                  contact.is_ert
-                                    ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'
-                                    : 'bg-gray-100 text-gray-600 dark:bg-[#1a2430] dark:text-gray-300'
-                                }`}
-                              >
-                                {contact.is_ert ? <Shield className="mr-1 h-3 w-3" /> : <ShieldOff className="mr-1 h-3 w-3" />}
-                                ERT
-                              </button>
-                              <button
-                                onClick={() => handleToggleIFA(contact)}
-                                className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
-                                  contact.is_ifa
-                                    ? 'bg-blue-100 text-blue-800 dark:bg-sky-900/30 dark:text-sky-300'
-                                    : 'bg-gray-100 text-gray-600 dark:bg-[#1a2430] dark:text-gray-300'
-                                }`}
-                              >
-                                <Building className="mr-1 h-3 w-3" />
-                                IFA
-                              </button>
-                              <button
-                                onClick={() => handleToggleExpose(contact)}
-                                className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
-                                  contact.expose
-                                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300'
-                                    : 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300'
-                                }`}
-                              >
-                                {contact.expose ? <Eye className="mr-1 h-3 w-3" /> : <EyeOff className="mr-1 h-3 w-3" />}
-                                {contact.expose ? 'Visible' : 'Hidden'}
-                              </button>
-                              <button
-                                onClick={() => handleToggleThirdParty(contact)}
-                                className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
-                                  contact.is_third_party
-                                    ? 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300'
-                                    : 'bg-gray-100 text-gray-600 dark:bg-[#1a2430] dark:text-gray-300'
-                                }`}
-                              >
-                                <Building2 className="mr-1 h-3 w-3" />
-                                3rd Party
-                              </button>
+                          <td className="px-3 py-4">
+                            <div className="max-w-[220px]">
+                              <div className="text-[15px] font-semibold leading-tight text-gray-900 dark:text-white">{contact.name}</div>
+                              <div className="mt-1 text-sm text-gray-500 dark:text-gray-400 truncate">
+                                {contact.email || contact.mobile || 'No direct contact'}
+                              </div>
                             </div>
                           </td>
-                          <td className="px-3 py-3">
-                            <div className="flex items-center gap-1">
+                          <td className="px-3 py-4">
+                            <div className="max-w-[310px] text-sm font-medium leading-snug text-gray-800 dark:text-gray-100">
+                              {contact.designation || 'No designation'}
+                            </div>
+                          </td>
+                          <td className="px-3 py-4">
+                            <div className="space-y-1">
+                              <div className="text-sm font-medium text-gray-800 dark:text-gray-100">{contact.department || 'No department'}</div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">{contact.extension ? `Ext ${contact.extension}` : 'No extension'}</div>
+                            </div>
+                          </td>
+                          <td className="px-3 py-4">
+                            <div className="text-sm font-medium text-gray-800 dark:text-gray-100">{contact.company || 'No company'}</div>
+                          </td>
+                          <td className="px-3 py-4">
+                            <div className="max-w-[220px] space-y-2">
+                              <div className="flex flex-wrap gap-2">
+                                <button
+                                  onClick={() => handleToggleERT(contact)}
+                                  className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+                                    contact.is_ert
+                                      ? 'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300'
+                                      : 'bg-gray-100 text-gray-500 dark:bg-[#1a2430] dark:text-gray-400'
+                                  }`}
+                                >
+                                  {contact.is_ert ? <Shield className="mr-1 h-3 w-3" /> : <ShieldOff className="mr-1 h-3 w-3" />}
+                                  ERT
+                                </button>
+                                <button
+                                  onClick={() => handleToggleIFA(contact)}
+                                  className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+                                    contact.is_ifa
+                                      ? 'bg-blue-100 text-blue-800 dark:bg-sky-900/30 dark:text-sky-300'
+                                      : 'bg-gray-100 text-gray-500 dark:bg-[#1a2430] dark:text-gray-400'
+                                  }`}
+                                >
+                                  <Building className="mr-1 h-3 w-3" />
+                                  IFA
+                                </button>
+                                <button
+                                  onClick={() => handleToggleThirdParty(contact)}
+                                  className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+                                    contact.is_third_party
+                                      ? 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300'
+                                      : 'bg-gray-100 text-gray-500 dark:bg-[#1a2430] dark:text-gray-400'
+                                  }`}
+                                >
+                                  <Building2 className="mr-1 h-3 w-3" />
+                                  3rd Party
+                                </button>
+                              </div>
+
+                              <div>
+                                <button
+                                  onClick={() => handleToggleExpose(contact)}
+                                  className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+                                    contact.expose
+                                      ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300'
+                                      : 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300'
+                                  }`}
+                                >
+                                  {contact.expose ? <Eye className="mr-1 h-3 w-3" /> : <EyeOff className="mr-1 h-3 w-3" />}
+                                  {contact.expose ? 'Visible' : 'Hidden'}
+                                </button>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-3 py-4">
+                            <div className="flex items-center gap-2">
                               <button
                                 onClick={() => handleEditContact(contact)}
-                                className="rounded-lg p-2 text-indigo-600 transition-colors hover:bg-indigo-50 dark:text-[#7fdcff] dark:hover:bg-[#102431]"
+                                className="rounded-xl border border-gray-200 p-2 text-indigo-600 transition-colors hover:bg-indigo-50 dark:border-[#2b3b4f] dark:text-[#7fdcff] dark:hover:bg-[#102431]"
                                 title="Edit contact"
                               >
                                 <Edit2 className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={() => handleDeleteClick(contact)}
-                                className="rounded-lg p-2 text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                                className="rounded-xl border border-gray-200 p-2 text-red-600 transition-colors hover:bg-red-50 dark:border-[#2b3b4f] dark:text-red-400 dark:hover:bg-red-900/20"
                                 title="Delete contact"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -1047,6 +1204,231 @@ const AdminDashboard = () => {
                   </div>
                 );
               })}
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 xl:grid-cols-[0.86fr_1.14fr]">
+              <div className="rounded-3xl border border-white/60 bg-white/90 p-6 shadow-lg shadow-indigo-100/40 dark:border-[#243244] dark:bg-[#121a23] dark:shadow-black/20">
+                <div className="mb-5">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">Taxonomy Manager</h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Review live directory values and jump straight into matching records.
+                  </p>
+                </div>
+
+                <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {taxonomyCards.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = selectedTaxonomy === item.id;
+                    const coveredCount = taxonomyCoverage[item.id];
+                    const coveragePercent = Math.round((coveredCount / taxonomyCoverage.total) * 100);
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => setSelectedTaxonomy(item.id)}
+                        className={`rounded-2xl border p-4 text-left transition-all ${
+                          isActive
+                            ? 'border-sky-200 bg-sky-50 shadow-sm dark:border-[#2d5973] dark:bg-[#102431]'
+                            : 'border-gray-200 bg-gray-50/80 hover:bg-gray-100 dark:border-[#253649] dark:bg-[#17212c] dark:hover:bg-[#1c2834]'
+                        }`}
+                      >
+                        <div className="mb-3 flex items-center justify-between">
+                          <span className={`flex h-10 w-10 items-center justify-center rounded-2xl ${
+                            isActive ? 'bg-white text-sky-600 dark:bg-[#132c3b] dark:text-[#7fdcff]' : 'bg-white/80 text-slate-600 dark:bg-[#1d2a37] dark:text-slate-300'
+                          }`}>
+                            <Icon className="h-4 w-4" />
+                          </span>
+                          <span className="badge badge-primary">{item.count}</span>
+                        </div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{item.label}</div>
+                        <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                          {coveredCount} contacts covered • {coveragePercent}%
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="rounded-2xl border border-gray-200 bg-gray-50/80 p-4 dark:border-[#253649] dark:bg-[#17212c]">
+                  <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                    {selectedTaxonomyMeta.label} coverage
+                  </div>
+                  <div className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
+                    {taxonomyCoverage[selectedTaxonomy]}
+                    <span className="ml-2 text-base font-medium text-gray-500 dark:text-gray-400">of {dashboardMetrics.total}</span>
+                  </div>
+                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-[#223243]">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-sky-400 to-cyan-300"
+                      style={{ width: `${Math.round((taxonomyCoverage[selectedTaxonomy] / taxonomyCoverage.total) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-white/60 bg-white/90 p-6 shadow-lg shadow-indigo-100/40 dark:border-[#243244] dark:bg-[#121a23] dark:shadow-black/20">
+                <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">{selectedTaxonomyMeta.label} Inventory</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Search live values, inspect usage, and manage taxonomy names from the backend.
+                    </p>
+                  </div>
+                  <div className="relative w-full lg:w-72">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      value={settingsSearchTerm}
+                      onChange={(e) => setSettingsSearchTerm(e.target.value)}
+                      placeholder={`Search ${selectedTaxonomyMeta.label.toLowerCase()}...`}
+                      className="input w-full pl-9"
+                    />
+                  </div>
+                </div>
+
+                <div className="mb-4 rounded-2xl border border-gray-200 bg-gray-50/80 p-4 dark:border-[#253649] dark:bg-[#17212c]">
+                  <div className="mb-3 text-sm font-semibold text-gray-900 dark:text-white">Create {selectedTaxonomySingularLabel}</div>
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <input
+                      type="text"
+                      value={newTaxonomyName}
+                      onChange={(e) => setNewTaxonomyName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleCreateTaxonomy();
+                        }
+                      }}
+                      placeholder={`Add a new ${selectedTaxonomySingularLabel.toLowerCase()}...`}
+                      className="input flex-1"
+                    />
+                    <button
+                      onClick={handleCreateTaxonomy}
+                      disabled={createTaxonomyMutation.isPending || !newTaxonomyName.trim()}
+                      className="btn-primary whitespace-nowrap disabled:opacity-50"
+                    >
+                      Create
+                    </button>
+                  </div>
+                </div>
+
+                {selectedTaxonomyItem && (
+                  <div className="mb-4 rounded-2xl border border-sky-100 bg-sky-50/70 p-4 dark:border-[#2d5973] dark:bg-[#102431]">
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                      <div>
+                        <div className="text-sm font-semibold text-gray-900 dark:text-white">Manage Selected Value</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          {selectedTaxonomyItem.count} {selectedTaxonomyItem.count === 1 ? 'contact uses this value' : 'contacts use this value'}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setSelectedTaxonomyItem(null);
+                          setRenameTaxonomyName('');
+                          setReplacementTaxonomyName('');
+                        }}
+                        className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                      >
+                        Clear
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div>
+                        <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">
+                          Rename Value
+                        </label>
+                        <div className="flex flex-col gap-2 sm:flex-row">
+                          <input
+                            type="text"
+                            value={renameTaxonomyName}
+                            onChange={(e) => setRenameTaxonomyName(e.target.value)}
+                            className="input flex-1"
+                          />
+                          <button
+                            onClick={handleRenameTaxonomy}
+                            disabled={renameTaxonomyMutation.isPending || !renameTaxonomyName.trim()}
+                            className="btn-secondary whitespace-nowrap disabled:opacity-50"
+                          >
+                            Rename
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">
+                          Replacement On Delete
+                        </label>
+                        <div className="flex flex-col gap-2 sm:flex-row">
+                          <input
+                            type="text"
+                            value={replacementTaxonomyName}
+                            onChange={(e) => setReplacementTaxonomyName(e.target.value)}
+                            placeholder={selectedTaxonomyItem.count > 0 ? 'Required if this value is in use' : 'Optional'}
+                            className="input flex-1"
+                          />
+                          <button
+                            onClick={handleDeleteTaxonomy}
+                            disabled={deleteTaxonomyMutation.isPending}
+                            className="btn-secondary whitespace-nowrap text-red-600 dark:text-red-400 disabled:opacity-50"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="max-h-[32rem] space-y-3 overflow-y-auto pr-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                  {isTaxonomyLoading && (
+                    <div className="rounded-2xl border border-gray-200 bg-gray-50/70 p-8 text-center text-sm text-gray-500 dark:border-[#31465a] dark:bg-[#17212c] dark:text-gray-400">
+                      Loading {selectedTaxonomyMeta.label.toLowerCase()}...
+                    </div>
+                  )}
+
+                  {filteredTaxonomyItems.slice(0, 12).map((item) => (
+                    <div
+                      key={item.name}
+                      className={`rounded-2xl border p-4 transition-colors ${
+                        selectedTaxonomyItem?.name === item.name
+                          ? 'border-sky-200 bg-sky-50/80 dark:border-[#2d5973] dark:bg-[#102431]'
+                          : 'border-gray-200 bg-gray-50/80 dark:border-[#253649] dark:bg-[#17212c]'
+                      }`}
+                    >
+                      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="min-w-0">
+                          <div className="text-[15px] font-semibold text-gray-900 dark:text-white">{item.name}</div>
+                          <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                            Used by {item.count} {item.count === 1 ? 'contact' : 'contacts'}
+                            {item.samples.length > 0 && ` • ${item.samples.join(', ')}`}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="badge badge-primary">{item.count}</span>
+                          <button
+                            onClick={() => handleSelectTaxonomyItem(item)}
+                            className="btn-secondary text-sm"
+                          >
+                            Manage
+                          </button>
+                          <button
+                            onClick={() => handleOpenTaxonomyInContacts(selectedTaxonomy, item.name)}
+                            className="btn-secondary text-sm"
+                          >
+                            View Contacts
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {filteredTaxonomyItems.length === 0 && (
+                    <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50/70 p-8 text-center text-sm text-gray-500 dark:border-[#31465a] dark:bg-[#17212c] dark:text-gray-400">
+                      No {selectedTaxonomyMeta.label.toLowerCase()} matched your search.
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
