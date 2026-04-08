@@ -14,6 +14,8 @@ import {
   Globe,
   User,
   MapPin,
+  Copy,
+  ExternalLink,
 } from 'lucide-react';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -21,6 +23,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateContact } from '../services/contactsApi';
 import toast from 'react-hot-toast';
 import axios from 'axios';
+import QRCode from 'qrcode';
 
 const InputField = ({ icon: Icon, label, value, onChange, type = 'text', placeholder, isEditing }) => (
   <div className="space-y-2">
@@ -61,6 +64,64 @@ const SectionCard = ({ title, description, children, icon: Icon }) => (
   </section>
 );
 
+const ActionChip = ({ as: Component = 'button', icon: Icon, label, ...props }) => (
+  <Component
+    className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-white/90 px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-purple-50 dark:border-[#29556e] dark:bg-[#13222d] dark:text-slate-100 dark:hover:bg-[#183040]"
+    {...props}
+  >
+    <Icon className="h-4 w-4 text-purple-500 dark:text-[#69d6ff]" />
+    {label}
+  </Component>
+);
+
+const IconActionButton = ({ as: Component = 'button', icon: Icon, label, ...props }) => (
+  <Component
+    className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-purple-200 bg-white/92 text-slate-700 shadow-sm transition-colors hover:bg-purple-50 dark:border-[#29556e] dark:bg-[#13222d] dark:text-slate-100 dark:hover:bg-[#183040]"
+    aria-label={label}
+    title={label}
+    {...props}
+  >
+    <Icon className="h-4.5 w-4.5 text-purple-500 dark:text-[#69d6ff]" />
+  </Component>
+);
+
+const UtilityField = ({ icon: Icon, label, value, href, onCopy, external = false }) => (
+  <div className="rounded-2xl border border-purple-100 bg-white/90 p-4 dark:border-[#29556e] dark:bg-[#102431]">
+    <div className="flex items-start justify-between gap-3">
+      <div className="min-w-0">
+        <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+          <Icon className="h-4 w-4 text-purple-500 dark:text-[#69d6ff]" />
+          {label}
+        </p>
+        <p className="mt-2 break-words text-sm font-semibold text-gray-900 dark:text-white">{value || '-'}</p>
+      </div>
+      {value && (
+        <div className="flex items-center gap-2">
+          {href && (
+            <a
+              href={href}
+              target={external ? '_blank' : undefined}
+              rel={external ? 'noopener noreferrer' : undefined}
+              className="rounded-full p-2 text-slate-500 transition-colors hover:bg-purple-50 hover:text-purple-600 dark:text-slate-400 dark:hover:bg-[#183040] dark:hover:text-[#69d6ff]"
+              aria-label={`Open ${label}`}
+            >
+              <ExternalLink className="h-4 w-4" />
+            </a>
+          )}
+          <button
+            type="button"
+            onClick={onCopy}
+            className="rounded-full p-2 text-slate-500 transition-colors hover:bg-purple-50 hover:text-purple-600 dark:text-slate-400 dark:hover:bg-[#183040] dark:hover:text-[#69d6ff]"
+            aria-label={`Copy ${label}`}
+          >
+            <Copy className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+    </div>
+  </div>
+);
+
 const ContactDetailModal = ({ contact, isOpen, onClose }) => {
   const { favorites, toggleFavorite } = useFavorites();
   const { isAuthenticated } = useAuth();
@@ -72,6 +133,7 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [tagInput, setTagInput] = useState('');
   const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
 
   const CLOUDINARY_CLOUD_NAME = 'dgyqwlpcm';
   const CLOUDINARY_UPLOAD_PRESET = 'ml_default';
@@ -83,6 +145,40 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
       setIsImagePreviewOpen(false);
     }
   }, [isOpen, contact?.id]);
+
+  useEffect(() => {
+    if (!isOpen || !contact) {
+      setQrCodeUrl('');
+      return;
+    }
+
+    const vCard = [
+      'BEGIN:VCARD',
+      'VERSION:3.0',
+      `FN:${contact.name || ''}`,
+      contact.designation ? `TITLE:${contact.designation}` : '',
+      contact.company ? `ORG:${contact.company}` : '',
+      contact.mobile ? `TEL;TYPE=CELL:${contact.mobile}` : '',
+      contact.landline ? `TEL;TYPE=WORK,VOICE:${contact.landline}` : '',
+      contact.extension ? `NOTE:Extension ${contact.extension}` : '',
+      contact.email ? `EMAIL;TYPE=INTERNET:${contact.email}` : '',
+      contact.website ? `URL:${contact.website}` : '',
+      'END:VCARD',
+    ]
+      .filter(Boolean)
+      .join('\n');
+
+    QRCode.toDataURL(vCard, {
+      width: 240,
+      margin: 1,
+      color: {
+        dark: '#111827',
+        light: '#FFFFFF',
+      },
+    })
+      .then(setQrCodeUrl)
+      .catch(() => setQrCodeUrl(''));
+  }, [isOpen, contact]);
 
   useEffect(() => {
     const handleEscape = (e) => {
@@ -226,6 +322,24 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
     setIsEditing(false);
     setEditedContact(contact);
     setProfileImage(contact.profile_picture || null);
+  };
+
+  const copyToClipboard = async (value, label) => {
+    if (!value) return;
+    try {
+      await navigator.clipboard.writeText(value);
+      toast.success(`${label} copied`);
+    } catch {
+      toast.error(`Failed to copy ${label.toLowerCase()}`);
+    }
+  };
+
+  const downloadQrCode = () => {
+    if (!qrCodeUrl) return;
+    const link = document.createElement('a');
+    link.href = qrCodeUrl;
+    link.download = `${(editedContact.name || 'contact').replace(/\s+/g, '-').toLowerCase()}-qr.png`;
+    link.click();
   };
 
   const previewPhone = editedContact.mobile || editedContact.landline || 'No contact number listed';
@@ -403,6 +517,49 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
                         </span>
                       )}
                     </div>
+
+                    {!isEditing && (
+                      <div className="mt-5 flex flex-wrap items-center justify-center gap-3 sm:justify-start">
+                        {(contact.mobile || contact.landline) && (
+                          <IconActionButton
+                            as="a"
+                            href={`tel:${contact.mobile || contact.landline}`}
+                            icon={Phone}
+                            label={contact.mobile ? 'Call mobile' : 'Call landline'}
+                          />
+                        )}
+                        {contact.email && (
+                          <IconActionButton
+                            as="a"
+                            href={`mailto:${contact.email}`}
+                            icon={Mail}
+                            label="Send email"
+                          />
+                        )}
+                        {contact.extension && (
+                          <IconActionButton
+                            icon={Copy}
+                            label="Copy extension"
+                            onClick={() => copyToClipboard(contact.extension, 'Extension')}
+                          />
+                        )}
+                        {contact.website && (
+                          <IconActionButton
+                            as="a"
+                            href={contact.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            icon={ExternalLink}
+                            label="Open website"
+                          />
+                        )}
+                        {(contact.mobile || contact.landline) && (
+                          <p className="basis-full text-xs text-slate-500 dark:text-slate-400 sm:basis-auto sm:pl-1">
+                            Quick actions
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -438,56 +595,100 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
                 </SectionCard>
 
                 <SectionCard title="Contact Channels" description="Primary ways to reach this contact." icon={Phone}>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="md:col-span-2">
+                  {isEditing ? (
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div className="md:col-span-2">
+                        <InputField
+                          icon={Mail}
+                          label="Email"
+                          type="email"
+                          value={editedContact.email}
+                          onChange={(val) => handleInputChange('email', val)}
+                          placeholder="email@example.com"
+                          isEditing={isEditing}
+                        />
+                      </div>
                       <InputField
-                        icon={Mail}
-                        label="Email"
-                        type="email"
-                        value={editedContact.email}
-                        onChange={(val) => handleInputChange('email', val)}
-                        placeholder="email@example.com"
+                        icon={Phone}
+                        label="Mobile"
+                        type="tel"
+                        value={editedContact.mobile}
+                        onChange={(val) => handleInputChange('mobile', val)}
+                        placeholder="+971 50 123 4567"
                         isEditing={isEditing}
                       />
-                    </div>
-                    <InputField
-                      icon={Phone}
-                      label="Mobile"
-                      type="tel"
-                      value={editedContact.mobile}
-                      onChange={(val) => handleInputChange('mobile', val)}
-                      placeholder="+971 50 123 4567"
-                      isEditing={isEditing}
-                    />
-                    <InputField
-                      icon={Phone}
-                      label="Landline"
-                      type="tel"
-                      value={editedContact.landline}
-                      onChange={(val) => handleInputChange('landline', val)}
-                      placeholder="+971 4 457 3388"
-                      isEditing={isEditing}
-                    />
-                    <InputField
-                      icon={Phone}
-                      label="Extension"
-                      value={editedContact.extension}
-                      onChange={(val) => handleInputChange('extension', val)}
-                      placeholder="3301"
-                      isEditing={isEditing}
-                    />
-                    <div className="md:col-span-2">
                       <InputField
-                        icon={Globe}
-                        label="Website"
-                        type="url"
-                        value={editedContact.website}
-                        onChange={(val) => handleInputChange('website', val)}
-                        placeholder="https://example.com"
+                        icon={Phone}
+                        label="Landline"
+                        type="tel"
+                        value={editedContact.landline}
+                        onChange={(val) => handleInputChange('landline', val)}
+                        placeholder="+971 4 457 3388"
                         isEditing={isEditing}
                       />
+                      <InputField
+                        icon={Phone}
+                        label="Extension"
+                        value={editedContact.extension}
+                        onChange={(val) => handleInputChange('extension', val)}
+                        placeholder="3301"
+                        isEditing={isEditing}
+                      />
+                      <div className="md:col-span-2">
+                        <InputField
+                          icon={Globe}
+                          label="Website"
+                          type="url"
+                          value={editedContact.website}
+                          onChange={(val) => handleInputChange('website', val)}
+                          placeholder="https://example.com"
+                          isEditing={isEditing}
+                        />
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div className="md:col-span-2">
+                        <UtilityField
+                          icon={Mail}
+                          label="Email"
+                          value={editedContact.email}
+                          href={editedContact.email ? `mailto:${editedContact.email}` : null}
+                          onCopy={() => copyToClipboard(editedContact.email, 'Email')}
+                        />
+                      </div>
+                      <UtilityField
+                        icon={Phone}
+                        label="Mobile"
+                        value={editedContact.mobile}
+                        href={editedContact.mobile ? `tel:${editedContact.mobile}` : null}
+                        onCopy={() => copyToClipboard(editedContact.mobile, 'Mobile')}
+                      />
+                      <UtilityField
+                        icon={Phone}
+                        label="Landline"
+                        value={editedContact.landline}
+                        href={editedContact.landline ? `tel:${editedContact.landline}` : null}
+                        onCopy={() => copyToClipboard(editedContact.landline, 'Landline')}
+                      />
+                      <UtilityField
+                        icon={Phone}
+                        label="Extension"
+                        value={editedContact.extension}
+                        onCopy={() => copyToClipboard(editedContact.extension, 'Extension')}
+                      />
+                      <div className="md:col-span-2">
+                        <UtilityField
+                          icon={Globe}
+                          label="Website"
+                          value={editedContact.website}
+                          href={editedContact.website}
+                          external
+                          onCopy={() => copyToClipboard(editedContact.website, 'Website')}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </SectionCard>
 
                 <SectionCard title="Languages" description="Spoken or supported languages." icon={Globe}>
@@ -592,6 +793,38 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
                   </div>
                 )}
               </SectionCard>
+
+              {!isEditing && qrCodeUrl && (
+                <SectionCard title="QR Contact Share" description="Scan to save this contact on another device." icon={Globe}>
+                  <div className="space-y-4">
+                    <div className="overflow-hidden rounded-2xl border border-purple-100 bg-white p-3 dark:border-[#29556e] dark:bg-[#102431]">
+                      <img
+                        src={qrCodeUrl}
+                        alt={`QR code for ${editedContact.name}`}
+                        className="mx-auto h-48 w-48 rounded-xl bg-white object-contain p-2"
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 gap-2">
+                      <button
+                        type="button"
+                        onClick={downloadQrCode}
+                        className="inline-flex items-center justify-center gap-2 rounded-xl border border-purple-200 bg-white/90 px-4 py-3 text-sm font-semibold text-purple-700 transition-colors hover:bg-purple-50 dark:border-[#29556e] dark:bg-[#13222d] dark:text-[#7eddff] dark:hover:bg-[#183040]"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        Download QR
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(editedContact.email || editedContact.mobile || editedContact.extension, 'Contact detail')}
+                        className="inline-flex items-center justify-center gap-2 rounded-xl border border-purple-200 bg-white/90 px-4 py-3 text-sm font-semibold text-purple-700 transition-colors hover:bg-purple-50 dark:border-[#29556e] dark:bg-[#13222d] dark:text-[#7eddff] dark:hover:bg-[#183040]"
+                      >
+                        <Copy className="h-4 w-4" />
+                        Copy Key Detail
+                      </button>
+                    </div>
+                  </div>
+                </SectionCard>
+              )}
             </div>
           </div>
         </div>
