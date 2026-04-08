@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: import.meta.env.VITE_API_BASE_URL || '',
 });
 
 // Request interceptor to add Authorization header
@@ -29,12 +29,16 @@ api.interceptors.response.use(
     if (error.response) {
       // Server responded with error status
       const { status, data } = error.response;
+      const requestUrl = error.config?.url || '';
+      const isAuthLoginRequest = requestUrl.includes('/api/auth/login');
 
       switch (status) {
         case 401:
-          // Unauthorized - clear token and redirect to login
-          localStorage.removeItem('token');
-          window.location.href = '/login';
+          // Do not hijack login failures; let the login page show the backend error.
+          if (!isAuthLoginRequest) {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+          }
           break;
         case 403:
           // Forbidden

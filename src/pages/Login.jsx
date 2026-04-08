@@ -56,11 +56,14 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      await login(formData.username, formData.password);
+      await login(formData.username.trim(), formData.password);
       toast.success('Login successful!');
       navigate('/admin');
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Login failed. Please try again.';
+      const errorMessage =
+        error.response?.data?.detail ||
+        error.response?.data?.message ||
+        'Login failed. Please try again.';
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);

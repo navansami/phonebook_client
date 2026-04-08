@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowUpDown, Plus, HelpCircle, Search } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
+import { ArrowUpDown, Plus, HelpCircle, Search, SlidersHorizontal, X } from 'lucide-react';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { useAuth } from '../contexts/AuthContext';
 import { getContacts, getTags, getLanguages, createContact } from '../services/contactsApi';
@@ -11,8 +10,7 @@ import toast from 'react-hot-toast';
 import Sidebar from '../components/Sidebar';
 import SearchOverlay from '../components/SearchOverlay';
 import SearchBar from '../components/SearchBar';
-import TagCloud from '../components/TagCloud';
-import LanguageBar from '../components/LanguageBar';
+import FilterDrawer from '../components/FilterDrawer';
 import ContactCard from '../components/ContactCard';
 import Pagination from '../components/Pagination';
 import ContactDetailModal from '../components/ContactDetailModal';
@@ -25,9 +23,20 @@ import AccessCodeModal from '../components/AccessCodeModal';
 import Loader from '../components/Loader';
 
 const ITEMS_PER_PAGE = 20; // 4x5 grid
+const EMPTY_FILTERS = {
+  tags: [],
+  languages: [],
+  departments: [],
+  companies: [],
+  designations: [],
+  statuses: {
+    ert: false,
+    ifa: false,
+    thirdParty: false,
+  },
+};
 
 const HomePage = () => {
-  const { theme } = useTheme();
   const { favorites, isFavorite } = useFavorites();
   const { isAuthenticated } = useAuth();
 
@@ -38,8 +47,7 @@ const HomePage = () => {
   const [currentView, setCurrentView] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
-  const [selectedTag, setSelectedTag] = useState(null);
-  const [selectedLanguage, setSelectedLanguage] = useState(null);
+  const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [sortBy, setSortBy] = useState('name');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedContact, setSelectedContact] = useState(null);
@@ -52,6 +60,7 @@ const HomePage = () => {
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
   const [isQuickTipModalOpen, setIsQuickTipModalOpen] = useState(false);
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
   // Debounce search query
   useEffect(() => {
@@ -161,7 +170,7 @@ const HomePage = () => {
   });
 
   // Fetch tags
-  const { data: tagsData, isLoading: isLoadingTags } = useQuery({
+  const { data: tagsData } = useQuery({
     queryKey: ['tags'],
     queryFn: async () => {
       const response = await getTags();
@@ -175,7 +184,7 @@ const HomePage = () => {
   });
 
   // Fetch languages
-  const { data: languagesData, isLoading: isLoadingLanguages } = useQuery({
+  const { data: languagesData } = useQuery({
     queryKey: ['languages'],
     queryFn: async () => {
       const response = await getLanguages();
@@ -230,18 +239,40 @@ const HomePage = () => {
       );
     }
 
-    // Apply tag filter
-    if (selectedTag) {
-      filtered = filtered.filter(contact =>
-        contact.tags?.includes(selectedTag)
+    if (filters.statuses.ert) {
+      filtered = filtered.filter((contact) => contact.is_ert);
+    }
+
+    if (filters.statuses.ifa) {
+      filtered = filtered.filter((contact) => contact.is_ifa);
+    }
+
+    if (filters.statuses.thirdParty) {
+      filtered = filtered.filter((contact) => contact.is_third_party);
+    }
+
+    if (filters.tags.length > 0) {
+      filtered = filtered.filter((contact) =>
+        filters.tags.some((tag) => contact.tags?.includes(tag))
       );
     }
 
-    // Apply language filter
-    if (selectedLanguage) {
-      filtered = filtered.filter(contact =>
-        contact.languages?.includes(selectedLanguage)
+    if (filters.languages.length > 0) {
+      filtered = filtered.filter((contact) =>
+        filters.languages.some((language) => contact.languages?.includes(language))
       );
+    }
+
+    if (filters.departments.length > 0) {
+      filtered = filtered.filter((contact) => filters.departments.includes(contact.department));
+    }
+
+    if (filters.companies.length > 0) {
+      filtered = filtered.filter((contact) => filters.companies.includes(contact.company));
+    }
+
+    if (filters.designations.length > 0) {
+      filtered = filtered.filter((contact) => filters.designations.includes(contact.designation));
     }
 
     // Apply sorting
@@ -269,18 +300,88 @@ const HomePage = () => {
       totalPages,
       totalResults
     };
-  }, [allContactsData, currentView, debouncedSearchQuery, selectedTag, selectedLanguage, sortBy, currentPage, isFavorite, favorites]);
+  }, [allContactsData, currentView, debouncedSearchQuery, filters, sortBy, currentPage, isFavorite, favorites]);
 
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearchQuery, selectedTag, selectedLanguage, currentView]);
+  }, [debouncedSearchQuery, filters, currentView]);
+
+  const filterOptions = useMemo(() => {
+    const contacts = allContactsData?.contacts || [];
+    const uniqueSorted = (values) => [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b));
+
+    return {
+      departments: uniqueSorted(contacts.map((contact) => contact.department)),
+      companies: uniqueSorted(contacts.map((contact) => contact.company)),
+      designations: uniqueSorted(contacts.map((contact) => contact.designation)),
+      tags: uniqueSorted(tagsData?.tags || []),
+      languages: uniqueSorted(languagesData?.languages || []),
+    };
+  }, [allContactsData, tagsData, languagesData]);
+
+  const activeFilterChips = useMemo(() => {
+    const chips = [];
+
+    filters.tags.forEach((tag) => chips.push({ key: `tag-${tag}`, group: 'tags', value: tag, label: `Tag: ${tag}` }));
+    filters.languages.forEach((language) =>
+      chips.push({ key: `language-${language}`, group: 'languages', value: language, label: `Language: ${language}` })
+    );
+    filters.departments.forEach((department) =>
+      chips.push({ key: `department-${department}`, group: 'departments', value: department, label: `Dept: ${department}` })
+    );
+    filters.companies.forEach((company) =>
+      chips.push({ key: `company-${company}`, group: 'companies', value: company, label: `Company: ${company}` })
+    );
+    filters.designations.forEach((designation) =>
+      chips.push({
+        key: `designation-${designation}`,
+        group: 'designations',
+        value: designation,
+        label: `Designation: ${designation}`,
+      })
+    );
+
+    if (filters.statuses.ert) chips.push({ key: 'status-ert', group: 'status', value: 'ert', label: 'ERT' });
+    if (filters.statuses.ifa) chips.push({ key: 'status-ifa', group: 'status', value: 'ifa', label: 'IFA' });
+    if (filters.statuses.thirdParty) {
+      chips.push({ key: 'status-thirdParty', group: 'status', value: 'thirdParty', label: 'Third Party' });
+    }
+
+    return chips;
+  }, [filters]);
+
+  const activeFilterCount = activeFilterChips.length;
 
   // Handlers
   const handleViewChange = (view) => {
     setCurrentView(view);
-    setSelectedTag(null);
-    setSelectedLanguage(null);
+  };
+
+  const handleApplyFilters = (nextFilters) => {
+    setFilters(nextFilters);
+  };
+
+  const handleClearAllFilters = () => {
+    setFilters(EMPTY_FILTERS);
+  };
+
+  const handleRemoveFilterChip = (chip) => {
+    if (chip.group === 'status') {
+      setFilters((prev) => ({
+        ...prev,
+        statuses: {
+          ...prev.statuses,
+          [chip.value]: false,
+        },
+      }));
+      return;
+    }
+
+    setFilters((prev) => ({
+      ...prev,
+      [chip.group]: prev[chip.group].filter((item) => item !== chip.value),
+    }));
   };
 
   const handleOpenDetail = (contact) => {
@@ -407,6 +508,20 @@ const HomePage = () => {
 
             {/* Actions */}
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsFilterDrawerOpen(true)}
+                className="btn-secondary flex items-center gap-2 text-sm"
+                aria-label="Open filters"
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+                <span className="hidden sm:inline">Filters</span>
+                {activeFilterCount > 0 && (
+                  <span className="badge badge-primary min-w-[1.5rem] justify-center px-2 py-0.5">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
+
               {/* Sort Dropdown */}
               <div className="relative">
                 <select
@@ -451,25 +566,21 @@ const HomePage = () => {
             </div>
           </div>
 
-          {/* Tag Cloud - Show when in tags view */}
-          {currentView === 'tags' && !isLoadingTags && tagsData?.tags && (
-            <div className="mb-4">
-              <TagCloud
-                tags={tagsData.tags}
-                selectedTag={selectedTag}
-                onSelectTag={setSelectedTag}
-              />
-            </div>
-          )}
-
-          {/* Language Bar - Show when in languages view */}
-          {currentView === 'languages' && !isLoadingLanguages && languagesData?.languages && (
-            <div className="mb-4">
-              <LanguageBar
-                languages={languagesData.languages}
-                selectedLanguage={selectedLanguage}
-                onSelectLanguage={setSelectedLanguage}
-              />
+          {activeFilterChips.length > 0 && (
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              {activeFilterChips.map((chip) => (
+                <button
+                  key={chip.key}
+                  onClick={() => handleRemoveFilterChip(chip)}
+                  className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-[#29556e] dark:bg-[#171d24] dark:text-[#dbe4ec] dark:hover:bg-[#1f252d]"
+                >
+                  <span>{chip.label}</span>
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              ))}
+              <button onClick={handleClearAllFilters} className="btn-ghost text-sm">
+                Clear all
+              </button>
             </div>
           )}
 
@@ -495,8 +606,7 @@ const HomePage = () => {
                   <button
                     onClick={() => {
                       setSearchQuery('');
-                      setSelectedTag(null);
-                      setSelectedLanguage(null);
+                      handleClearAllFilters();
                     }}
                     className="btn-primary"
                   >
@@ -571,6 +681,15 @@ const HomePage = () => {
 
       {/* Quick Tip Modal */}
       <QuickTipModal isOpen={isQuickTipModalOpen} onClose={() => setIsQuickTipModalOpen(false)} />
+
+      <FilterDrawer
+        isOpen={isFilterDrawerOpen}
+        onClose={() => setIsFilterDrawerOpen(false)}
+        filters={filters}
+        onApply={handleApplyFilters}
+        onClearAll={handleClearAllFilters}
+        options={filterOptions}
+      />
 
       {/* Access Code Modal */}
       <AccessCodeModal
