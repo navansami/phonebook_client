@@ -2,6 +2,42 @@ import { useEffect } from 'react';
 import { X, Search } from 'lucide-react';
 
 const QuickTipModal = ({ isOpen, onClose }) => {
+  // Add custom styles for animations
+  const pulseAnimation = `
+    @keyframes pulse-ring {
+      0% {
+        transform: scale(0.8);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1.4);
+        opacity: 0;
+      }
+    }
+    @keyframes bounce-gentle {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-8px);
+      }
+    }
+    .pulse-ring {
+      animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    .pulse-ring-delay-1 {
+      animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      animation-delay: 0.5s;
+    }
+    .pulse-ring-delay-2 {
+      animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      animation-delay: 1s;
+    }
+    .bounce-gentle {
+      animation: bounce-gentle 2s ease-in-out infinite;
+    }
+  `;
+
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === 'Escape') onClose();
@@ -27,11 +63,13 @@ const QuickTipModal = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn"
-      onClick={handleBackdropClick}
-    >
-      <div className="bg-gradient-to-br from-purple-600 via-purple-500 to-violet-600 rounded-3xl shadow-2xl max-w-md w-full p-6 relative overflow-hidden">
+    <>
+      <style>{pulseAnimation}</style>
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn"
+        onClick={handleBackdropClick}
+      >
+        <div className="bg-gradient-to-br from-purple-600 via-purple-500 to-violet-600 rounded-3xl shadow-2xl max-w-md w-full p-6 relative overflow-hidden">
         {/* Background decorative elements */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-10">
           <div className="absolute -top-10 -right-10 w-32 h-32 bg-white rounded-full blur-3xl"></div>
@@ -49,9 +87,15 @@ const QuickTipModal = ({ isOpen, onClose }) => {
 
         {/* Content */}
         <div className="relative z-10 text-center">
-          {/* Search Icon */}
-          <div className="flex items-center justify-center mb-4">
-            <div className="w-20 h-20 rounded-full bg-purple-400/30 backdrop-blur-sm flex items-center justify-center">
+          {/* Search Icon with Pulse Animation */}
+          <div className="flex items-center justify-center mb-4 relative">
+            {/* Pulse rings */}
+            <div className="absolute w-20 h-20 rounded-full bg-purple-300/40 pulse-ring"></div>
+            <div className="absolute w-20 h-20 rounded-full bg-purple-300/40 pulse-ring-delay-1"></div>
+            <div className="absolute w-20 h-20 rounded-full bg-purple-300/40 pulse-ring-delay-2"></div>
+
+            {/* Main icon container */}
+            <div className="relative w-20 h-20 rounded-full bg-purple-400/30 backdrop-blur-sm flex items-center justify-center">
               <div className="w-14 h-14 rounded-full bg-purple-300/40 backdrop-blur-sm flex items-center justify-center">
                 <Search className="w-8 h-8 text-white" strokeWidth={2.5} />
               </div>
@@ -71,8 +115,8 @@ const QuickTipModal = ({ isOpen, onClose }) => {
 
           {/* Visual Demonstration */}
           <div className="flex items-center justify-center gap-4 mb-6">
-            {/* TAB Key */}
-            <div className="bg-white/90 backdrop-blur-sm rounded-lg px-6 py-3 shadow-lg">
+            {/* TAB Key with Bounce Animation */}
+            <div className="bg-white/90 backdrop-blur-sm rounded-lg px-6 py-3 shadow-lg bounce-gentle">
               <span className="text-2xl font-bold text-purple-600">TAB</span>
             </div>
 
@@ -95,6 +139,7 @@ const QuickTipModal = ({ isOpen, onClose }) => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
