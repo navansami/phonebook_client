@@ -65,6 +65,13 @@ export const deleteContact = (id) => {
   return api.delete(`/api/admin/contacts/${id}`);
 };
 
+export const bulkUpdateContacts = (contactIds, updates) => {
+  return api.patch('/api/admin/contacts/bulk', {
+    contact_ids: contactIds,
+    updates,
+  });
+};
+
 /**
  * Toggle ERT status for a contact (admin only)
  * @param {string} id - Contact ID

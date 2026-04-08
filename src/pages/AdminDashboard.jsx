@@ -79,6 +79,19 @@ const AdminDashboard = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState(null);
   const [contactToDelete, setContactToDelete] = useState(null);
+  const [isBulkEditorOpen, setIsBulkEditorOpen] = useState(false);
+  const [selectedContactIds, setSelectedContactIds] = useState([]);
+  const [bulkUpdates, setBulkUpdates] = useState({
+    department: '',
+    company: '',
+    designation: '',
+    tags: '',
+    languages: '',
+    expose: 'keep',
+    is_ert: 'keep',
+    is_ifa: 'keep',
+    is_third_party: 'keep',
+  });
 
   const {
     data: contactsData,
@@ -236,6 +249,30 @@ const AdminDashboard = () => {
     },
     onError: (err) => {
       toast.error(err.response?.data?.detail || 'Failed to remove taxonomy value');
+    },
+  });
+
+  const bulkUpdateMutation = useMutation({
+    mutationFn: ({ contactIds, updates }) => contactsApi.bulkUpdateContacts(contactIds, updates),
+    onSuccess: (response) => {
+      queryClient.invalidateQueries(['admin-contacts']);
+      queryClient.invalidateQueries(['admin-taxonomy']);
+      toast.success(response.data?.message || 'Contacts updated successfully');
+      setSelectedContactIds([]);
+      setBulkUpdates({
+        department: '',
+        company: '',
+        designation: '',
+        tags: '',
+        languages: '',
+        expose: 'keep',
+        is_ert: 'keep',
+        is_ifa: 'keep',
+        is_third_party: 'keep',
+      });
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.detail || 'Failed to update selected contacts');
     },
   });
 
@@ -422,6 +459,18 @@ const AdminDashboard = () => {
     setSettingsSearchTerm('');
   }, [selectedTaxonomy]);
 
+  useEffect(() => {
+    setSelectedContactIds((prev) =>
+      prev.filter((id) => paginatedContacts.some((contact) => contact.id === id))
+    );
+  }, [paginatedContacts]);
+
+  useEffect(() => {
+    if (selectedContactIds.length === 0) {
+      setIsBulkEditorOpen(false);
+    }
+  }, [selectedContactIds]);
+
   const handleSort = (column) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -503,6 +552,53 @@ const AdminDashboard = () => {
     setAdminFilter('all');
     setCurrentPage(1);
     setSearchTerm(searchPrefixes[taxonomyType] || value);
+  };
+
+  const handleToggleSelectContact = (contactId) => {
+    setSelectedContactIds((prev) =>
+      prev.includes(contactId) ? prev.filter((id) => id !== contactId) : [...prev, contactId]
+    );
+  };
+
+  const handleToggleSelectAllVisible = () => {
+    const visibleIds = paginatedContacts.map((contact) => contact.id);
+    const allSelected = visibleIds.every((id) => selectedContactIds.includes(id));
+    setSelectedContactIds((prev) =>
+      allSelected
+        ? prev.filter((id) => !visibleIds.includes(id))
+        : [...new Set([...prev, ...visibleIds])]
+    );
+  };
+
+  const handleBulkInputChange = (field, value) => {
+    setBulkUpdates((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleApplyBulkUpdates = () => {
+    if (selectedContactIds.length === 0) return;
+
+    const updates = {};
+    if (bulkUpdates.department.trim()) updates.department = bulkUpdates.department.trim();
+    if (bulkUpdates.company.trim()) updates.company = bulkUpdates.company.trim();
+    if (bulkUpdates.designation.trim()) updates.designation = bulkUpdates.designation.trim();
+    if (bulkUpdates.tags.trim()) {
+      updates.tags = bulkUpdates.tags.split(',').map((item) => item.trim()).filter(Boolean);
+    }
+    if (bulkUpdates.languages.trim()) {
+      updates.languages = bulkUpdates.languages.split(',').map((item) => item.trim()).filter(Boolean);
+    }
+    ['expose', 'is_ert', 'is_ifa', 'is_third_party'].forEach((key) => {
+      if (bulkUpdates[key] !== 'keep') {
+        updates[key] = bulkUpdates[key] === 'true';
+      }
+    });
+
+    if (Object.keys(updates).length === 0) {
+      toast.error('Choose at least one bulk update before applying');
+      return;
+    }
+
+    bulkUpdateMutation.mutate({ contactIds: selectedContactIds, updates });
   };
 
   const handleCreateTaxonomy = () => {
@@ -888,6 +984,101 @@ const AdminDashboard = () => {
 
         {activeSection === 'contacts' && (
           <div className="space-y-6">
+            {selectedContactIds.length > 0 && (
+              <div className="sticky top-4 z-20 rounded-3xl border border-sky-100 bg-white/95 p-4 shadow-lg shadow-sky-100/50 backdrop-blur dark:border-[#2d5973] dark:bg-[#121a23]/95 dark:shadow-black/20">
+                <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+                  <div>
+                    <div className="text-lg font-bold text-gray-900 dark:text-white">
+                      {selectedContactIds.length} selected {selectedContactIds.length === 1 ? 'contact' : 'contacts'}
+                    </div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                      Keep selecting contacts, then open the bulk editor when ready.
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      onClick={() => setIsBulkEditorOpen((prev) => !prev)}
+                      className="btn-primary text-sm"
+                    >
+                      {isBulkEditorOpen ? 'Hide Bulk Actions' : 'Show Bulk Actions'}
+                    </button>
+                    <button
+                      onClick={() => setSelectedContactIds([])}
+                      className="btn-secondary text-sm"
+                    >
+                      Clear Selection
+                    </button>
+                  </div>
+                </div>
+
+                {isBulkEditorOpen && (
+                  <div className="mt-4 border-t border-sky-100 pt-4 dark:border-[#2d5973]">
+                    <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+                      <input
+                        value={bulkUpdates.department}
+                        onChange={(e) => handleBulkInputChange('department', e.target.value)}
+                        placeholder="Department"
+                        className="input"
+                      />
+                      <input
+                        value={bulkUpdates.company}
+                        onChange={(e) => handleBulkInputChange('company', e.target.value)}
+                        placeholder="Company"
+                        className="input"
+                      />
+                      <input
+                        value={bulkUpdates.designation}
+                        onChange={(e) => handleBulkInputChange('designation', e.target.value)}
+                        placeholder="Designation"
+                        className="input"
+                      />
+                      <input
+                        value={bulkUpdates.tags}
+                        onChange={(e) => handleBulkInputChange('tags', e.target.value)}
+                        placeholder="Tags (comma separated)"
+                        className="input"
+                      />
+                      <input
+                        value={bulkUpdates.languages}
+                        onChange={(e) => handleBulkInputChange('languages', e.target.value)}
+                        placeholder="Languages (comma separated)"
+                        className="input"
+                      />
+                      <div className="grid grid-cols-2 gap-3">
+                        {[
+                          ['expose', 'Visibility'],
+                          ['is_ert', 'ERT'],
+                          ['is_ifa', 'IFA'],
+                          ['is_third_party', '3rd Party'],
+                        ].map(([field, label]) => (
+                          <select
+                            key={field}
+                            value={bulkUpdates[field]}
+                            onChange={(e) => handleBulkInputChange(field, e.target.value)}
+                            className="input text-sm"
+                          >
+                            <option value="keep">{label}: Keep</option>
+                            <option value="true">{label}: Yes</option>
+                            <option value="false">{label}: No</option>
+                          </select>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-4 flex justify-end">
+                      <button
+                        onClick={handleApplyBulkUpdates}
+                        disabled={bulkUpdateMutation.isPending}
+                        className="btn-primary disabled:opacity-50"
+                      >
+                        Apply To Selected
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="rounded-3xl border border-white/60 bg-white/90 p-5 shadow-lg shadow-indigo-100/40 dark:border-[#243244] dark:bg-[#121a23] dark:shadow-black/20">
               <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                 <div className="relative flex-1 xl:max-w-md">
@@ -936,6 +1127,14 @@ const AdminDashboard = () => {
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-[#243244] table-fixed">
                   <thead className="bg-gray-50 dark:bg-[#0f151d]">
                     <tr>
+                      <th className="w-12 px-3 py-3 text-left">
+                        <input
+                          type="checkbox"
+                          checked={paginatedContacts.length > 0 && paginatedContacts.every((contact) => selectedContactIds.includes(contact.id))}
+                          onChange={handleToggleSelectAllVisible}
+                          className="h-4 w-4 rounded border-gray-300"
+                        />
+                      </th>
                       <th className="w-16 px-3 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                         Photo
                       </th>
@@ -954,7 +1153,7 @@ const AdminDashboard = () => {
                   <tbody className="bg-white dark:bg-[#121a23]">
                     {paginatedContacts.length === 0 ? (
                       <tr>
-                        <td colSpan="7" className="px-4 py-12 text-center">
+                        <td colSpan="8" className="px-4 py-12 text-center">
                           <div className="text-gray-500 dark:text-gray-400">
                             <AlertCircle className="w-12 h-12 mx-auto mb-2 opacity-50" />
                             <p className="text-lg font-medium">No contacts found</p>
@@ -967,6 +1166,14 @@ const AdminDashboard = () => {
                     ) : (
                       paginatedContacts.map((contact) => (
                         <tr key={contact.id} className="border-b border-gray-200/80 align-top transition-colors hover:bg-gray-50/80 dark:border-[#243244] dark:hover:bg-[#17212c]">
+                          <td className="px-3 py-4">
+                            <input
+                              type="checkbox"
+                              checked={selectedContactIds.includes(contact.id)}
+                              onChange={() => handleToggleSelectContact(contact.id)}
+                              className="mt-3 h-4 w-4 rounded border-gray-300"
+                            />
+                          </td>
                           <td className="px-3 py-4">
                             {contact.profile_picture ? (
                               <img
