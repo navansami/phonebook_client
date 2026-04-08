@@ -71,6 +71,7 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
   const [profileImage, setProfileImage] = useState(contact?.profile_picture || null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [tagInput, setTagInput] = useState('');
+  const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
 
   const CLOUDINARY_CLOUD_NAME = 'dgyqwlpcm';
   const CLOUDINARY_UPLOAD_PRESET = 'ml_default';
@@ -79,12 +80,19 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
     if (isOpen && contact) {
       setEditedContact(contact);
       setProfileImage(contact.profile_picture || null);
+      setIsImagePreviewOpen(false);
     }
   }, [isOpen, contact?.id]);
 
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === 'Escape') handleClose();
+      if (e.key === 'Escape') {
+        if (isImagePreviewOpen) {
+          setIsImagePreviewOpen(false);
+          return;
+        }
+        handleClose();
+      }
     };
 
     if (isOpen) {
@@ -96,7 +104,7 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
       document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen]);
+  }, [isOpen, isImagePreviewOpen]);
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => updateContact(id, data),
@@ -203,6 +211,7 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
     setTimeout(() => {
       setIsClosing(false);
       setIsEditing(false);
+      setIsImagePreviewOpen(false);
       onClose();
     }, 300);
   };
@@ -218,6 +227,10 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
     setEditedContact(contact);
     setProfileImage(contact.profile_picture || null);
   };
+
+  const previewPhone = editedContact.mobile || editedContact.landline || 'No contact number listed';
+  const previewEmail = editedContact.email || 'No email address listed';
+  const previewExtension = editedContact.extension || 'No extension listed';
 
   return (
     <>
@@ -327,7 +340,14 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
               <div className="rounded-3xl border border-purple-200/80 bg-gradient-to-br from-purple-50 via-white to-violet-50 p-4 shadow-lg shadow-purple-100/50 dark:border-[#24465c] dark:bg-[linear-gradient(135deg,rgba(22,30,39,0.98),rgba(15,20,27,0.98))] dark:shadow-[0_22px_40px_rgba(2,6,23,0.35)] sm:p-6">
                 <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
                   <div className="relative flex-shrink-0">
-                    <div className="h-32 w-32 rounded-[1.7rem] bg-gradient-to-br from-purple-400 via-violet-400 to-fuchsia-400 p-1 shadow-xl dark:from-[#23b7f2] dark:via-[#1598df] dark:to-[#0d6fb0] sm:h-44 sm:w-44">
+                    <button
+                      type="button"
+                      onClick={() => profileImage && !isEditing && setIsImagePreviewOpen(true)}
+                      className={`h-32 w-32 rounded-[1.7rem] bg-gradient-to-br from-purple-400 via-violet-400 to-fuchsia-400 p-1 shadow-xl transition-transform dark:from-[#23b7f2] dark:via-[#1598df] dark:to-[#0d6fb0] sm:h-44 sm:w-44 ${
+                        profileImage && !isEditing ? 'cursor-zoom-in hover:scale-[1.02]' : 'cursor-default'
+                      }`}
+                      aria-label={profileImage && !isEditing ? 'Open expanded profile image' : 'Profile image'}
+                    >
                       <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-[1.45rem] bg-white dark:bg-[#0e141b]">
                         {profileImage ? (
                           <img src={profileImage} alt={editedContact.name} className="h-full w-full object-cover" />
@@ -337,7 +357,7 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
                           </div>
                         )}
                       </div>
-                    </div>
+                    </button>
                   </div>
 
                   <div className="w-full flex-1 text-center sm:text-left">
@@ -576,6 +596,84 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
           </div>
         </div>
       </div>
+
+      {isImagePreviewOpen && profileImage && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/80 px-6 py-8 backdrop-blur-md"
+          onClick={() => setIsImagePreviewOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-4xl overflow-hidden rounded-[2rem] border border-white/10 bg-white shadow-2xl dark:bg-[#10171f]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setIsImagePreviewOpen(false)}
+              className="absolute right-5 top-5 z-10 rounded-full bg-black/35 p-2 text-white transition-colors hover:bg-black/55"
+              aria-label="Close image preview"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <div className="grid grid-cols-1 md:grid-cols-[1.35fr_0.9fr]">
+              <div className="bg-slate-100 dark:bg-[#091018]">
+                <img src={profileImage} alt={editedContact.name} className="h-full max-h-[78vh] w-full object-cover" />
+              </div>
+
+              <div className="flex flex-col justify-between bg-gradient-to-br from-white to-purple-50 p-6 dark:from-[#131b23] dark:to-[#101923]">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-purple-500 dark:text-[#69d6ff]">
+                    Expanded View
+                  </p>
+                  <h3 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+                    {editedContact.name}
+                  </h3>
+                  {editedContact.designation && (
+                    <p className="mt-2 text-base font-semibold text-purple-600 dark:text-slate-200">
+                      {editedContact.designation}
+                    </p>
+                  )}
+                  {editedContact.company && (
+                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{editedContact.company}</p>
+                  )}
+                </div>
+
+                <div className="mt-8 space-y-4">
+                  <div className="rounded-2xl border border-purple-100 bg-white/90 p-4 dark:border-[#294152] dark:bg-[#17212c]">
+                    <div className="flex items-start gap-3">
+                      <Phone className="mt-0.5 h-5 w-5 text-purple-500 dark:text-[#69d6ff]" />
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Contact Number</p>
+                        <p className="mt-1 text-base font-semibold text-gray-900 dark:text-white break-words">{previewPhone}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-purple-100 bg-white/90 p-4 dark:border-[#294152] dark:bg-[#17212c]">
+                    <div className="flex items-start gap-3">
+                      <Phone className="mt-0.5 h-5 w-5 text-purple-500 dark:text-[#69d6ff]" />
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Extension</p>
+                        <p className="mt-1 text-base font-semibold text-gray-900 dark:text-white break-words">{previewExtension}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-purple-100 bg-white/90 p-4 dark:border-[#294152] dark:bg-[#17212c]">
+                    <div className="flex items-start gap-3">
+                      <Mail className="mt-0.5 h-5 w-5 text-purple-500 dark:text-[#69d6ff]" />
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Email Address</p>
+                        <p className="mt-1 text-base font-semibold text-gray-900 dark:text-white break-words">{previewEmail}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

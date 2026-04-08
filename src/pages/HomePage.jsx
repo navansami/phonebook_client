@@ -46,6 +46,7 @@ const HomePage = () => {
   // State Management
   const [currentView, setCurrentView] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchScope, setSearchScope] = useState('all');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [sortBy, setSortBy] = useState('name');
@@ -227,15 +228,27 @@ const HomePage = () => {
     // Apply search filter
     if (debouncedSearchQuery) {
       const query = debouncedSearchQuery.toLowerCase();
+      const matchesScope = (contact, scope) => {
+        const fields = {
+          name: contact.name,
+          extension: contact.extension,
+          department: contact.department,
+          company: contact.company,
+          designation: contact.designation,
+          email: contact.email,
+          mobile: contact.mobile,
+          landline: contact.landline,
+        };
+
+        if (scope === 'all') {
+          return Object.values(fields).some((value) => value?.toLowerCase().includes(query));
+        }
+
+        return fields[scope]?.toLowerCase().includes(query);
+      };
+
       filtered = filtered.filter(contact =>
-        contact.name?.toLowerCase().includes(query) ||
-        contact.designation?.toLowerCase().includes(query) ||
-        contact.department?.toLowerCase().includes(query) ||
-        contact.extension?.toLowerCase().includes(query) ||
-        contact.email?.toLowerCase().includes(query) ||
-        contact.mobile?.toLowerCase().includes(query) ||
-        contact.landline?.toLowerCase().includes(query) ||
-        contact.company?.toLowerCase().includes(query)
+        matchesScope(contact, searchScope)
       );
     }
 
@@ -300,7 +313,42 @@ const HomePage = () => {
       totalPages,
       totalResults
     };
-  }, [allContactsData, currentView, debouncedSearchQuery, filters, sortBy, currentPage, isFavorite, favorites]);
+  }, [allContactsData, currentView, debouncedSearchQuery, searchScope, filters, sortBy, currentPage, isFavorite, favorites]);
+
+  const searchSuggestions = useMemo(() => {
+    const contacts = allContactsData?.contacts || [];
+    if (!searchQuery.trim()) return [];
+
+    const query = searchQuery.toLowerCase();
+    const getMatchLabel = (contact) => {
+      const candidates = [
+        ['Name', contact.name],
+        ['Extension', contact.extension],
+        ['Department', contact.department],
+        ['Company', contact.company],
+        ['Designation', contact.designation],
+        ['Email', contact.email],
+      ];
+
+      if (searchScope !== 'all') {
+        const matched = candidates.find(([label]) => label.toLowerCase() === searchScope && (contact[searchScope] || '').toLowerCase().includes(query));
+        if (matched) return `${matched[0]}: ${matched[1]}`;
+      }
+
+      const firstMatch = candidates.find(([, value]) => value?.toLowerCase().includes(query));
+      return firstMatch ? `${firstMatch[0]}: ${firstMatch[1]}` : null;
+    };
+
+    return contacts
+      .filter((contact) => getMatchLabel(contact))
+      .slice(0, 6)
+      .map((contact) => ({
+        id: contact._id || contact.id,
+        name: contact.name,
+        label: getMatchLabel(contact),
+        contact,
+      }));
+  }, [allContactsData, searchQuery, searchScope]);
 
   // Reset page when filters change
   useEffect(() => {
@@ -387,6 +435,12 @@ const HomePage = () => {
   const handleOpenDetail = (contact) => {
     setSelectedContact(contact);
     setIsDetailModalOpen(true);
+  };
+
+  const handleSelectSuggestion = (suggestion) => {
+    setSelectedContact(suggestion.contact);
+    setIsDetailModalOpen(true);
+    setIsSearchOverlayOpen(false);
   };
 
   const handleCloseDetail = () => {
@@ -480,8 +534,12 @@ const HomePage = () => {
           <SearchBar
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
+            searchScope={searchScope}
+            setSearchScope={setSearchScope}
+            suggestions={searchSuggestions}
             onSearch={() => {}}
             onClear={() => setSearchQuery('')}
+            onSelectSuggestion={handleSelectSuggestion}
           />
         </div>
 
@@ -584,6 +642,29 @@ const HomePage = () => {
             </div>
           )}
 
+          {debouncedSearchQuery && (
+            <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-600 shadow-sm dark:border-[#24303c] dark:bg-[#171d24] dark:text-slate-300">
+              <span className="font-semibold text-gray-900 dark:text-white">Search active</span>
+              <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600 dark:bg-[#24303c] dark:text-slate-300">
+                Scope: {searchScope === 'all' ? 'All Fields' : searchScope}
+              </span>
+              <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700 dark:bg-[#112433] dark:text-[#69d6ff]">
+                “{debouncedSearchQuery}”
+              </span>
+              <span>{totalResults} results</span>
+              <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 dark:bg-[#2a2416] dark:text-amber-300">
+                Press `Esc` to clear search
+              </span>
+              <button
+                onClick={() => setSearchQuery('')}
+                className="ml-auto inline-flex items-center gap-2 rounded-full border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-[#2d3a47] dark:text-slate-300 dark:hover:bg-[#1f252d]"
+              >
+                <X className="h-3.5 w-3.5" />
+                Clear Search
+              </button>
+            </div>
+          )}
+
           {/* Contact Grid */}
           {isLoadingContacts ? (
             <div className="flex items-center justify-center py-20">
@@ -648,6 +729,10 @@ const HomePage = () => {
         onClose={() => setIsSearchOverlayOpen(false)}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
+        searchScope={searchScope}
+        setSearchScope={setSearchScope}
+        suggestions={searchSuggestions}
+        onSelectSuggestion={handleSelectSuggestion}
       />
 
       {/* Contact Detail Modal */}
