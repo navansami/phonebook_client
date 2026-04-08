@@ -10,7 +10,6 @@ import {
   Tag,
   Shield,
   Edit2,
-  Save,
   Globe,
   User,
   MapPin,
@@ -18,32 +17,18 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { useFavorites } from '../contexts/FavoritesContext';
-import { useAuth } from '../contexts/AuthContext';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateContact } from '../services/contactsApi';
 import toast from 'react-hot-toast';
-import axios from 'axios';
 import QRCode from 'qrcode';
 
-const InputField = ({ icon: Icon, label, value, onChange, type = 'text', placeholder, isEditing }) => (
+const InputField = ({ icon: Icon, label, value }) => (
   <div className="space-y-2">
     <label className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-purple-700 dark:text-[#69d6ff]">
       <Icon className="h-4 w-4" />
       {label}
     </label>
-    {isEditing ? (
-      <input
-        type={type}
-        value={value || ''}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full rounded-xl border-2 border-purple-200 bg-white px-4 py-3 text-gray-900 outline-none transition-all focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:border-[#29556e] dark:bg-[#17212c] dark:text-gray-100 dark:focus:border-[#23b7f2] dark:focus:ring-[#23b7f2]/20"
-      />
-    ) : (
-      <div className="rounded-xl border border-purple-100 bg-purple-50/60 px-4 py-3 dark:border-[#29556e] dark:bg-[#102431]">
-        <p className="break-words font-medium text-gray-900 dark:text-gray-100">{value || '-'}</p>
-      </div>
-    )}
+    <div className="rounded-xl border border-purple-100 bg-purple-50/60 px-4 py-3 dark:border-[#29556e] dark:bg-[#102431]">
+      <p className="break-words font-medium text-gray-900 dark:text-gray-100">{value || '-'}</p>
+    </div>
   </div>
 );
 
@@ -62,16 +47,6 @@ const SectionCard = ({ title, description, children, icon: Icon }) => (
     </div>
     {children}
   </section>
-);
-
-const ActionChip = ({ as: Component = 'button', icon: Icon, label, ...props }) => (
-  <Component
-    className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-white/90 px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-purple-50 dark:border-[#29556e] dark:bg-[#13222d] dark:text-slate-100 dark:hover:bg-[#183040]"
-    {...props}
-  >
-    <Icon className="h-4 w-4 text-purple-500 dark:text-[#69d6ff]" />
-    {label}
-  </Component>
 );
 
 const IconActionButton = ({ as: Component = 'button', icon: Icon, label, ...props }) => (
@@ -122,21 +97,13 @@ const UtilityField = ({ icon: Icon, label, value, href, onCopy, external = false
   </div>
 );
 
-const ContactDetailModal = ({ contact, isOpen, onClose }) => {
+const ContactDetailModal = ({ contact, isOpen, onClose, onEdit }) => {
   const { favorites, toggleFavorite } = useFavorites();
-  const { isAuthenticated } = useAuth();
-  const queryClient = useQueryClient();
   const [isClosing, setIsClosing] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [editedContact, setEditedContact] = useState(contact || {});
   const [profileImage, setProfileImage] = useState(contact?.profile_picture || null);
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
-  const [tagInput, setTagInput] = useState('');
   const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState('');
-
-  const CLOUDINARY_CLOUD_NAME = 'dgyqwlpcm';
-  const CLOUDINARY_UPLOAD_PRESET = 'ml_default';
 
   useEffect(() => {
     if (isOpen && contact) {
@@ -202,111 +169,14 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
     };
   }, [isOpen, isImagePreviewOpen]);
 
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => updateContact(id, data),
-    onSuccess: (response) => {
-      queryClient.invalidateQueries(['contacts']);
-      toast.success('Contact updated successfully!');
-      setIsEditing(false);
-
-      if (response?.data) {
-        setEditedContact(response.data);
-        setProfileImage(response.data.profile_picture || null);
-      } else {
-        setEditedContact({ ...editedContact });
-      }
-    },
-    onError: (error) => {
-      toast.error(error.response?.data?.message || 'Failed to update contact');
-    },
-  });
-
   if (!isOpen || !contact) return null;
 
   const isFavorite = favorites.includes(contact.id);
-
-  const handleInputChange = (field, value) => {
-    setEditedContact((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleArrayChange = (field, value) => {
-    const items = value.split(',').map((item) => item.trim()).filter((item) => item);
-    setEditedContact((prev) => ({ ...prev, [field]: items }));
-  };
-
-  const handleAddTag = (e) => {
-    if (e.key === 'Enter' && tagInput.trim()) {
-      e.preventDefault();
-      const currentTags = editedContact.tags || [];
-      if (!currentTags.includes(tagInput.trim())) {
-        setEditedContact((prev) => ({
-          ...prev,
-          tags: [...currentTags, tagInput.trim()],
-        }));
-      }
-      setTagInput('');
-    }
-  };
-
-  const handleRemoveTag = (tagToRemove) => {
-    setEditedContact((prev) => ({
-      ...prev,
-      tags: (prev.tags || []).filter((tag) => tag !== tagToRemove),
-    }));
-  };
-
-  const handleSave = () => {
-    updateMutation.mutate({
-      id: contact.id,
-      data: editedContact,
-    });
-  };
-
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please upload an image file');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image size must be less than 5MB');
-      return;
-    }
-
-    setIsUploadingImage(true);
-
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-      formData.append('cloud_name', CLOUDINARY_CLOUD_NAME);
-      formData.append('folder', 'ftp-contacts');
-
-      const response = await axios.post(
-        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-        formData
-      );
-
-      const imageUrl = response.data.secure_url;
-      setProfileImage(imageUrl);
-      setEditedContact((prev) => ({ ...prev, profile_picture: imageUrl }));
-      toast.success('Profile picture uploaded successfully!');
-    } catch (error) {
-      console.error('Upload error:', error);
-      toast.error('Failed to upload image. Please try again.');
-    } finally {
-      setIsUploadingImage(false);
-    }
-  };
 
   const handleClose = () => {
     setIsClosing(true);
     setTimeout(() => {
       setIsClosing(false);
-      setIsEditing(false);
       setIsImagePreviewOpen(false);
       onClose();
     }, 300);
@@ -316,12 +186,6 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
     if (e.target === e.currentTarget) {
       handleClose();
     }
-  };
-
-  const resetEditing = () => {
-    setIsEditing(false);
-    setEditedContact(contact);
-    setProfileImage(contact.profile_picture || null);
   };
 
   const copyToClipboard = async (value, label) => {
@@ -370,51 +234,29 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
                 <User className="h-6 w-6 text-white" />
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/65">User Directory</p>
-                  <h2 className="text-xl font-bold text-white">{isEditing ? 'Edit Contact' : 'Contact Details'}</h2>
+                  <h2 className="text-xl font-bold text-white">Contact Details</h2>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                {!isEditing && (
-                  <button
-                    onClick={() => toggleFavorite(contact.id)}
-                    className="rounded-full p-2 transition-all duration-200 hover:scale-110 hover:bg-white/20 active:scale-95"
-                    aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-                  >
-                    <Star
-                      className={`h-5 w-5 transition-all ${
-                        isFavorite ? 'fill-amber-300 text-amber-300' : 'text-white/70 hover:text-white'
-                      }`}
-                    />
-                  </button>
-                )}
-                {!isEditing && isAuthenticated && (
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="flex items-center gap-2 rounded-lg bg-white/20 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-white/30"
-                    aria-label="Edit contact"
-                  >
-                    <Edit2 className="h-4 w-4" />
-                    Edit
-                  </button>
-                )}
-                {isEditing && (
-                  <>
-                    <button
-                      onClick={handleSave}
-                      disabled={updateMutation.isLoading}
-                      className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-bold text-purple-600 transition-all duration-200 hover:bg-white/90 disabled:opacity-50 dark:text-[#0f6f9a]"
-                    >
-                      <Save className="h-4 w-4" />
-                      {updateMutation.isLoading ? 'Saving...' : 'Save'}
-                    </button>
-                    <button
-                      onClick={resetEditing}
-                      className="rounded-lg bg-white/20 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-white/30"
-                    >
-                      Cancel
-                    </button>
-                  </>
-                )}
+                <button
+                  onClick={() => toggleFavorite(contact.id)}
+                  className="rounded-full p-2 transition-all duration-200 hover:scale-110 hover:bg-white/20 active:scale-95"
+                  aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                >
+                  <Star
+                    className={`h-5 w-5 transition-all ${
+                      isFavorite ? 'fill-amber-300 text-amber-300' : 'text-white/70 hover:text-white'
+                    }`}
+                  />
+                </button>
+                <button
+                  onClick={() => onEdit?.(contact)}
+                  className="flex items-center gap-2 rounded-lg bg-white/20 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-white/30"
+                  aria-label="Edit contact"
+                >
+                  <Edit2 className="h-4 w-4" />
+                  Edit
+                </button>
                 <button
                   onClick={handleClose}
                   className="rounded-full p-2 transition-all duration-200 hover:scale-110 hover:bg-white/20 active:scale-95"
@@ -456,11 +298,11 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
                   <div className="relative flex-shrink-0">
                     <button
                       type="button"
-                      onClick={() => profileImage && !isEditing && setIsImagePreviewOpen(true)}
+                      onClick={() => profileImage && setIsImagePreviewOpen(true)}
                       className={`h-32 w-32 rounded-[1.7rem] bg-gradient-to-br from-purple-400 via-violet-400 to-fuchsia-400 p-1 shadow-xl transition-transform dark:from-[#23b7f2] dark:via-[#1598df] dark:to-[#0d6fb0] sm:h-44 sm:w-44 ${
-                        profileImage && !isEditing ? 'cursor-zoom-in hover:scale-[1.02]' : 'cursor-default'
+                        profileImage ? 'cursor-zoom-in hover:scale-[1.02]' : 'cursor-default'
                       }`}
-                      aria-label={profileImage && !isEditing ? 'Open expanded profile image' : 'Profile image'}
+                      aria-label={profileImage ? 'Open expanded profile image' : 'Profile image'}
                     >
                       <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-[1.45rem] bg-white dark:bg-[#0e141b]">
                         {profileImage ? (
@@ -475,33 +317,17 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
                   </div>
 
                   <div className="min-w-0 w-full flex-1 text-center sm:text-left">
-                    {isEditing ? (
-                      <div className="space-y-4">
-                        <input
-                          type="text"
-                          value={editedContact.name || ''}
-                          onChange={(e) => handleInputChange('name', e.target.value)}
-                          className="w-full border-b-2 border-purple-300 bg-transparent py-2 text-xl font-bold text-gray-900 outline-none focus:border-purple-600 dark:border-[#29556e] dark:text-white dark:focus:border-[#23b7f2] sm:text-2xl"
-                          placeholder="Contact Name"
-                        />
-                        <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-purple-200 bg-white px-4 py-2 text-sm font-semibold text-purple-700 shadow-sm transition-colors hover:bg-purple-50 dark:border-[#29556e] dark:bg-[#13222d] dark:text-[#7eddff] dark:hover:bg-[#183040]">
-                          <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                          {isUploadingImage ? 'Uploading...' : 'Upload Photo'}
-                        </label>
-                      </div>
-                    ) : (
-                      <>
-                        <h3 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
-                          {contact.name}
-                        </h3>
-                        <p className="mt-3 text-base font-semibold text-purple-600 dark:text-slate-200 sm:text-lg">
-                          {contact.designation || 'No designation assigned'}
-                        </p>
-                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                          {contact.company || 'No company listed'}
-                        </p>
-                      </>
-                    )}
+                    <>
+                      <h3 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+                        {contact.name}
+                      </h3>
+                      <p className="mt-3 text-base font-semibold text-purple-600 dark:text-slate-200 sm:text-lg">
+                        {contact.designation || 'No designation assigned'}
+                      </p>
+                      <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                        {contact.company || 'No company listed'}
+                      </p>
+                    </>
 
                     <div className="mt-4 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
                       {contact.department && (
@@ -518,48 +344,51 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
                       )}
                     </div>
 
-                    {!isEditing && (
-                      <div className="mt-5 flex flex-wrap items-center justify-center gap-3 sm:justify-start">
-                        {(contact.mobile || contact.landline) && (
-                          <IconActionButton
-                            as="a"
-                            href={`tel:${contact.mobile || contact.landline}`}
-                            icon={Phone}
-                            label={contact.mobile ? 'Call mobile' : 'Call landline'}
-                          />
-                        )}
-                        {contact.email && (
-                          <IconActionButton
-                            as="a"
-                            href={`mailto:${contact.email}`}
-                            icon={Mail}
-                            label="Send email"
-                          />
-                        )}
-                        {contact.extension && (
-                          <IconActionButton
-                            icon={Copy}
-                            label="Copy extension"
-                            onClick={() => copyToClipboard(contact.extension, 'Extension')}
-                          />
-                        )}
-                        {contact.website && (
-                          <IconActionButton
-                            as="a"
-                            href={contact.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            icon={ExternalLink}
-                            label="Open website"
-                          />
-                        )}
-                        {(contact.mobile || contact.landline) && (
-                          <p className="basis-full text-xs text-slate-500 dark:text-slate-400 sm:basis-auto sm:pl-1">
-                            Quick actions
-                          </p>
-                        )}
-                      </div>
-                    )}
+                    <div className="mt-5 flex flex-wrap items-center justify-center gap-3 sm:justify-start">
+                      {(contact.mobile || contact.landline) && (
+                        <IconActionButton
+                          as="a"
+                          href={`tel:${contact.mobile || contact.landline}`}
+                          icon={Phone}
+                          label={contact.mobile ? 'Call mobile' : 'Call landline'}
+                        />
+                      )}
+                      {contact.email && (
+                        <IconActionButton
+                          as="a"
+                          href={`mailto:${contact.email}`}
+                          icon={Mail}
+                          label="Send email"
+                        />
+                      )}
+                      {contact.extension && (
+                        <IconActionButton
+                          icon={Copy}
+                          label="Copy extension"
+                          onClick={() => copyToClipboard(contact.extension, 'Extension')}
+                        />
+                      )}
+                      {contact.website && (
+                        <IconActionButton
+                          as="a"
+                          href={contact.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          icon={ExternalLink}
+                          label="Open website"
+                        />
+                      )}
+                      <IconActionButton
+                        icon={Edit2}
+                        label="Edit contact"
+                        onClick={() => onEdit?.(contact)}
+                      />
+                      {(contact.mobile || contact.landline) && (
+                        <p className="basis-full text-xs text-slate-500 dark:text-slate-400 sm:basis-auto sm:pl-1">
+                          Quick actions
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -571,83 +400,22 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
                       icon={Briefcase}
                       label="Designation"
                       value={editedContact.designation}
-                      onChange={(val) => handleInputChange('designation', val)}
-                      placeholder="e.g. Senior Manager"
-                      isEditing={isEditing}
                     />
                     <InputField
                       icon={Building2}
                       label="Department"
                       value={editedContact.department}
-                      onChange={(val) => handleInputChange('department', val)}
-                      placeholder="e.g. Sales"
-                      isEditing={isEditing}
                     />
                     <InputField
                       icon={Building2}
                       label="Company"
                       value={editedContact.company}
-                      onChange={(val) => handleInputChange('company', val)}
-                      placeholder="e.g. Fairmont The Palm"
-                      isEditing={isEditing}
                     />
                   </div>
                 </SectionCard>
 
                 <SectionCard title="Contact Channels" description="Primary ways to reach this contact." icon={Phone}>
-                  {isEditing ? (
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <div className="md:col-span-2">
-                        <InputField
-                          icon={Mail}
-                          label="Email"
-                          type="email"
-                          value={editedContact.email}
-                          onChange={(val) => handleInputChange('email', val)}
-                          placeholder="email@example.com"
-                          isEditing={isEditing}
-                        />
-                      </div>
-                      <InputField
-                        icon={Phone}
-                        label="Mobile"
-                        type="tel"
-                        value={editedContact.mobile}
-                        onChange={(val) => handleInputChange('mobile', val)}
-                        placeholder="+971 50 123 4567"
-                        isEditing={isEditing}
-                      />
-                      <InputField
-                        icon={Phone}
-                        label="Landline"
-                        type="tel"
-                        value={editedContact.landline}
-                        onChange={(val) => handleInputChange('landline', val)}
-                        placeholder="+971 4 457 3388"
-                        isEditing={isEditing}
-                      />
-                      <InputField
-                        icon={Phone}
-                        label="Extension"
-                        value={editedContact.extension}
-                        onChange={(val) => handleInputChange('extension', val)}
-                        placeholder="3301"
-                        isEditing={isEditing}
-                      />
-                      <div className="md:col-span-2">
-                        <InputField
-                          icon={Globe}
-                          label="Website"
-                          type="url"
-                          value={editedContact.website}
-                          onChange={(val) => handleInputChange('website', val)}
-                          placeholder="https://example.com"
-                          isEditing={isEditing}
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div className="md:col-span-2">
                         <UtilityField
                           icon={Mail}
@@ -688,21 +456,11 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
                         />
                       </div>
                     </div>
-                  )}
                 </SectionCard>
 
                 <SectionCard title="Languages" description="Spoken or supported languages." icon={Globe}>
                   <div className="space-y-2">
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={editedContact.languages?.join(', ') || ''}
-                        onChange={(e) => handleArrayChange('languages', e.target.value)}
-                        placeholder="English, Arabic, French"
-                        className="w-full rounded-xl border-2 border-purple-200 bg-white px-4 py-3 text-gray-900 outline-none transition-all focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:border-[#29556e] dark:bg-[#17212c] dark:text-gray-100 dark:focus:border-[#23b7f2] dark:focus:ring-[#23b7f2]/20"
-                      />
-                    ) : (
-                      <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2">
                         {editedContact.languages && editedContact.languages.length > 0 ? (
                           editedContact.languages.map((lang, index) => (
                             <span
@@ -718,7 +476,6 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
                           </p>
                         )}
                       </div>
-                    )}
                   </div>
                 </SectionCard>
               </div>
@@ -726,40 +483,7 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
 
             <div className="space-y-6 lg:col-span-1">
               <SectionCard title="Tags" description="Keywords used to group and filter contacts." icon={Tag}>
-                {isEditing ? (
-                  <div className="space-y-3">
-                    <input
-                      type="text"
-                      value={tagInput}
-                      onChange={(e) => setTagInput(e.target.value)}
-                      onKeyDown={handleAddTag}
-                      placeholder="Type a tag and press Enter..."
-                      className="w-full rounded-xl border-2 border-purple-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition-all focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:border-[#29556e] dark:bg-[#17212c] dark:text-gray-100 dark:focus:border-[#23b7f2] dark:focus:ring-[#23b7f2]/20"
-                    />
-                    <div className="flex flex-wrap gap-2">
-                      {editedContact.tags && editedContact.tags.length > 0 ? (
-                        editedContact.tags.map((tag, index) => (
-                          <span
-                            key={index}
-                            className="group inline-flex items-center gap-1.5 rounded-full border border-purple-200 bg-purple-100 px-3 py-1.5 text-sm font-medium text-purple-700 transition-colors hover:bg-purple-200 dark:border-[#29556e] dark:bg-[#1d2b37] dark:text-slate-100 dark:hover:bg-[#253645]"
-                          >
-                            {tag}
-                            <button
-                              onClick={() => handleRemoveTag(tag)}
-                              className="rounded-full p-0.5 transition-colors hover:bg-purple-300 dark:hover:bg-[#34485c]"
-                              aria-label={`Remove ${tag}`}
-                            >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </span>
-                        ))
-                      ) : (
-                        <p className="text-sm italic text-gray-400">No tags yet. Press Enter to add.</p>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2">
                     {editedContact.tags && editedContact.tags.length > 0 ? (
                       editedContact.tags.map((tag, index) => (
                         <span
@@ -773,28 +497,17 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
                       <p className="text-sm italic text-gray-400">No tags</p>
                     )}
                   </div>
-                )}
               </SectionCard>
 
               <SectionCard title="Comments" description="Operational notes and additional context." icon={MessageSquare}>
-                {isEditing ? (
-                  <textarea
-                    value={editedContact.comments || ''}
-                    onChange={(e) => handleInputChange('comments', e.target.value)}
-                    placeholder="Additional notes or comments..."
-                    rows={8}
-                    className="w-full resize-none rounded-xl border-2 border-purple-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition-all focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:border-[#29556e] dark:bg-[#17212c] dark:text-gray-100 dark:focus:border-[#23b7f2] dark:focus:ring-[#23b7f2]/20"
-                  />
-                ) : (
-                  <div className="min-h-[180px] rounded-xl border border-purple-100 bg-gradient-to-br from-purple-50 to-violet-50 p-4 dark:border-[#29556e] dark:bg-[linear-gradient(135deg,rgba(31,44,57,0.95),rgba(42,54,71,0.95))]">
-                    <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-700 dark:text-gray-100">
-                      {editedContact.comments || <span className="italic text-gray-400">No comments</span>}
-                    </p>
-                  </div>
-                )}
+                <div className="min-h-[180px] rounded-xl border border-purple-100 bg-gradient-to-br from-purple-50 to-violet-50 p-4 dark:border-[#29556e] dark:bg-[linear-gradient(135deg,rgba(31,44,57,0.95),rgba(42,54,71,0.95))]">
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-700 dark:text-gray-100">
+                    {editedContact.comments || <span className="italic text-gray-400">No comments</span>}
+                  </p>
+                </div>
               </SectionCard>
 
-              {!isEditing && qrCodeUrl && (
+              {qrCodeUrl && (
                 <SectionCard title="QR Contact Share" description="Scan to save this contact on another device." icon={Globe}>
                   <div className="space-y-4">
                     <div className="overflow-hidden rounded-2xl border border-purple-100 bg-white p-3 dark:border-[#29556e] dark:bg-[#102431]">

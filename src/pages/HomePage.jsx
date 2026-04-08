@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ArrowUpDown, Plus, HelpCircle, Search, SlidersHorizontal, X } from 'lucide-react';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { useAuth } from '../contexts/AuthContext';
-import { getContacts, getTags, getLanguages, createContact } from '../services/contactsApi';
+import { getContacts, getTags, getLanguages, createContact, updateContact } from '../services/contactsApi';
 import toast from 'react-hot-toast';
 
 // Components
@@ -50,8 +50,11 @@ const HomePage = () => {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [sortBy, setSortBy] = useState('name');
+  const [browseMode, setBrowseMode] = useState('cards');
+  const [selectedLetter, setSelectedLetter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedContact, setSelectedContact] = useState(null);
+  const [formContact, setFormContact] = useState(null);
 
   // Modal States
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
@@ -199,9 +202,9 @@ const HomePage = () => {
   });
 
   // Client-side filtering and pagination with useMemo
-  const { contacts: filteredContacts, totalPages, totalResults } = useMemo(() => {
+  const { contacts: filteredContacts, groupedContacts, totalPages, totalResults } = useMemo(() => {
     if (!allContactsData?.contacts || !Array.isArray(allContactsData.contacts)) {
-      return { contacts: [], totalPages: 1, totalResults: 0 };
+      return { contacts: [], groupedContacts: [], totalPages: 1, totalResults: 0 };
     }
 
     let filtered = [...allContactsData.contacts];
@@ -249,6 +252,12 @@ const HomePage = () => {
 
       filtered = filtered.filter(contact =>
         matchesScope(contact, searchScope)
+      );
+    }
+
+    if (selectedLetter) {
+      filtered = filtered.filter((contact) =>
+        (contact.name || '').trim().toUpperCase().startsWith(selectedLetter)
       );
     }
 
@@ -301,6 +310,23 @@ const HomePage = () => {
     });
 
     const totalResults = filtered.length;
+    const groupedContacts = filtered.reduce((groups, currentContact) => {
+      const departmentName = currentContact.department || 'Other';
+      const existingGroup = groups.find((group) => group.department === departmentName);
+
+      if (existingGroup) {
+        existingGroup.contacts.push(currentContact);
+      } else {
+        groups.push({
+          department: departmentName,
+          contacts: [currentContact],
+        });
+      }
+
+      return groups;
+    }, []);
+
+    groupedContacts.sort((a, b) => a.department.localeCompare(b.department));
     const totalPages = Math.ceil(totalResults / ITEMS_PER_PAGE) || 1;
 
     // Paginate
@@ -310,10 +336,11 @@ const HomePage = () => {
 
     return {
       contacts: paginatedContacts,
+      groupedContacts,
       totalPages,
       totalResults
     };
-  }, [allContactsData, currentView, debouncedSearchQuery, searchScope, filters, sortBy, currentPage, isFavorite, favorites]);
+  }, [allContactsData, currentView, debouncedSearchQuery, searchScope, selectedLetter, filters, sortBy, currentPage, isFavorite, favorites]);
 
   const searchSuggestions = useMemo(() => {
     const contacts = allContactsData?.contacts || [];
@@ -350,10 +377,34 @@ const HomePage = () => {
       }));
   }, [allContactsData, searchQuery, searchScope]);
 
+  const availableLetters = useMemo(() => {
+    const contacts = allContactsData?.contacts || [];
+    const visibleContacts = contacts.filter((contact) => {
+      if (currentView === 'emergency') return contact.is_ert;
+      if (currentView === 'ifa') return contact.is_ifa;
+      if (currentView === 'thirdparty') return contact.is_third_party;
+      if (currentView === 'all') return !contact.is_third_party;
+      if (currentView === 'favorites') {
+        const id = contact._id || contact.id;
+        return id && isFavorite(id);
+      }
+      if (currentView === 'languages' || currentView === 'tags') {
+        return !contact.is_ifa && !contact.is_third_party;
+      }
+      return true;
+    });
+
+    return [...new Set(
+      visibleContacts
+        .map((contact) => (contact.name || '').trim().charAt(0).toUpperCase())
+        .filter((letter) => /^[A-Z]$/.test(letter))
+    )].sort();
+  }, [allContactsData, currentView, isFavorite, favorites]);
+
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearchQuery, filters, currentView]);
+  }, [debouncedSearchQuery, selectedLetter, filters, currentView, browseMode]);
 
   const filterOptions = useMemo(() => {
     const contacts = allContactsData?.contacts || [];
@@ -449,34 +500,52 @@ const HomePage = () => {
   };
 
   const handleOpenForm = () => {
+    setFormContact(null);
     setIsFormModalOpen(true);
   };
 
   const handleCloseForm = () => {
     setIsFormModalOpen(false);
+    setFormContact(null);
   };
 
   const handleFormSubmit = async (formData) => {
     try {
-      await createContact(formData);
-      toast.success('Contact added successfully!');
-      // Refetch contacts to show the new contact
+      if (formContact) {
+        await updateContact(formContact.id || formContact._id, formData);
+        toast.success('Contact updated successfully!');
+      } else {
+        await createContact(formData);
+        toast.success('Contact added successfully!');
+      }
       refetchContacts();
       handleCloseForm();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to add contact. Please try again.');
+      toast.error(
+        error.response?.data?.detail ||
+          (formContact ? 'Failed to update contact. Please try again.' : 'Failed to add contact. Please try again.')
+      );
       throw error;
     }
   };
 
   const handleEditContact = (contact) => {
-    // Open the detail modal which will have edit functionality
-    setSelectedContact(contact);
-    setIsDetailModalOpen(true);
+    setSelectedContact(null);
+    setIsDetailModalOpen(false);
+    setFormContact(contact);
+    setIsFormModalOpen(true);
   };
 
   const handleSortChange = (e) => {
     setSortBy(e.target.value);
+  };
+
+  const handleBrowseModeChange = (mode) => {
+    setBrowseMode(mode);
+  };
+
+  const handleLetterToggle = (letter) => {
+    setSelectedLetter((currentLetter) => (currentLetter === letter ? '' : letter));
   };
 
   const handlePageChange = (page) => {
@@ -624,6 +693,31 @@ const HomePage = () => {
             </div>
           </div>
 
+          <div className="mb-5 flex justify-start xl:pl-2">
+            <div className="inline-flex rounded-2xl bg-gray-100 p-1 shadow-sm dark:bg-[#10151b]">
+              <button
+                onClick={() => handleBrowseModeChange('cards')}
+                className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
+                  browseMode === 'cards'
+                    ? 'bg-white text-gray-900 shadow-sm dark:bg-[#1d2732] dark:text-white'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200'
+                }`}
+              >
+                Card View
+              </button>
+              <button
+                onClick={() => handleBrowseModeChange('grouped')}
+                className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
+                  browseMode === 'grouped'
+                    ? 'bg-white text-gray-900 shadow-sm dark:bg-[#1d2732] dark:text-white'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200'
+                }`}
+              >
+                Department View
+              </button>
+            </div>
+          </div>
+
           {activeFilterChips.length > 0 && (
             <div className="mb-4 flex flex-wrap items-center gap-2">
               {activeFilterChips.map((chip) => (
@@ -696,9 +790,34 @@ const HomePage = () => {
                 )}
               </div>
             </div>
+          ) : browseMode === 'grouped' ? (
+            <div className="space-y-6 pr-12 md:pr-16 xl:pr-20">
+              {groupedContacts.map((group) => (
+                <section key={group.department} className="rounded-3xl border border-gray-200 bg-white/75 p-4 shadow-sm dark:border-[#24303c] dark:bg-[#171d24]">
+                  <div className="mb-4 flex items-center justify-between gap-3 border-b border-gray-100 pb-3 dark:border-[#24303c]">
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-900 dark:text-white">{group.department}</h2>
+                      <p className="text-sm text-gray-500 dark:text-slate-400">
+                        {group.contacts.length} contact{group.contacts.length === 1 ? '' : 's'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4">
+                    {group.contacts.map((contact) => (
+                      <ContactCard
+                        key={contact._id || contact.id}
+                        contact={contact}
+                        onOpenDetail={handleOpenDetail}
+                        onEdit={handleEditContact}
+                      />
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-3 mb-4">
+              <div className="mb-4 grid grid-cols-1 gap-3 pr-12 sm:grid-cols-2 md:pr-16 lg:grid-cols-3 xl:grid-cols-4 xl:pr-20 2xl:grid-cols-4">
                 {filteredContacts.map((contact) => (
                   <ContactCard
                     key={contact._id || contact.id}
@@ -723,6 +842,38 @@ const HomePage = () => {
         </div>
       </div>
 
+      {availableLetters.length > 0 && (
+        <div className="fixed right-3 top-1/2 z-20 hidden -translate-y-1/2 md:flex">
+          <div className="flex max-h-[72vh] flex-col items-center gap-1 overflow-y-auto rounded-3xl border border-gray-200 bg-white/92 px-2 py-3 shadow-lg backdrop-blur dark:border-[#24303c] dark:bg-[#171d24]/95">
+            <button
+              onClick={() => setSelectedLetter('')}
+              className={`flex min-h-7 w-8 items-center justify-center rounded-full px-1 text-[10px] font-bold transition-colors ${
+                !selectedLetter
+                  ? 'bg-indigo-600 text-white dark:bg-[#23b7f2] dark:text-[#051018]'
+                  : 'text-gray-500 hover:bg-gray-100 dark:text-slate-400 dark:hover:bg-[#24303c]'
+              }`}
+              title="Show all letters"
+            >
+              All
+            </button>
+            {availableLetters.map((letter) => (
+              <button
+                key={letter}
+                onClick={() => handleLetterToggle(letter)}
+                className={`flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-bold transition-colors ${
+                  selectedLetter === letter
+                    ? 'bg-indigo-600 text-white dark:bg-[#23b7f2] dark:text-[#051018]'
+                    : 'text-gray-500 hover:bg-gray-100 dark:text-slate-400 dark:hover:bg-[#24303c]'
+                }`}
+                title={`Jump to ${letter}`}
+              >
+                {letter}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Desktop Search Overlay */}
       <SearchOverlay
         isOpen={isSearchOverlayOpen}
@@ -740,12 +891,14 @@ const HomePage = () => {
         contact={selectedContact}
         isOpen={isDetailModalOpen}
         onClose={handleCloseDetail}
+        onEdit={handleEditContact}
       />
 
       {/* Contact Form Modal */}
       <ContactFormModal
         isOpen={isFormModalOpen}
         onClose={handleCloseForm}
+        contact={formContact}
         onSubmit={handleFormSubmit}
       />
 
