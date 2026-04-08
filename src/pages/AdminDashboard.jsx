@@ -80,6 +80,9 @@ const AdminDashboard = () => {
   const [selectedContact, setSelectedContact] = useState(null);
   const [contactToDelete, setContactToDelete] = useState(null);
   const [isBulkEditorOpen, setIsBulkEditorOpen] = useState(false);
+  const [selectedImportFile, setSelectedImportFile] = useState(null);
+  const [importPreview, setImportPreview] = useState(null);
+  const [isImportPanelOpen, setIsImportPanelOpen] = useState(false);
   const [selectedContactIds, setSelectedContactIds] = useState([]);
   const [bulkUpdates, setBulkUpdates] = useState({
     department: '',
@@ -273,6 +276,24 @@ const AdminDashboard = () => {
     },
     onError: (err) => {
       toast.error(err.response?.data?.detail || 'Failed to update selected contacts');
+    },
+  });
+
+  const importPreviewMutation = useMutation({
+    mutationFn: ({ file, applyChanges }) => contactsApi.importContactsCsv(file, applyChanges),
+    onSuccess: (response, variables) => {
+      setImportPreview(response.data);
+      if (variables.applyChanges) {
+        queryClient.invalidateQueries(['admin-contacts']);
+        queryClient.invalidateQueries(['admin-taxonomy']);
+        toast.success(`Imported ${response.data?.created_count || 0} contacts`);
+        setSelectedImportFile(null);
+      } else {
+        toast.success('Import preview ready');
+      }
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.detail || 'Failed to import CSV');
     },
   });
 
@@ -599,6 +620,47 @@ const AdminDashboard = () => {
     }
 
     bulkUpdateMutation.mutate({ contactIds: selectedContactIds, updates });
+  };
+
+  const handleExportContacts = async () => {
+    try {
+      const params = {
+        search: searchTerm || undefined,
+        is_ert: adminFilter === 'ert' ? true : undefined,
+        is_ifa: adminFilter === 'ifa' ? true : undefined,
+        is_third_party: adminFilter === 'thirdParty' ? true : undefined,
+      };
+      if (adminFilter === 'hidden') params.exclude_third_party = undefined;
+
+      const response = await contactsApi.exportContactsCsv(params);
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'text/csv' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'phonebook_contacts.csv');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success('CSV export downloaded');
+    } catch (error) {
+      toast.error('Failed to export contacts');
+    }
+  };
+
+  const handlePreviewImport = () => {
+    if (!selectedImportFile) {
+      toast.error('Choose a CSV file first');
+      return;
+    }
+    importPreviewMutation.mutate({ file: selectedImportFile, applyChanges: false });
+  };
+
+  const handleApplyImport = () => {
+    if (!selectedImportFile) {
+      toast.error('Choose a CSV file first');
+      return;
+    }
+    importPreviewMutation.mutate({ file: selectedImportFile, applyChanges: true });
   };
 
   const handleCreateTaxonomy = () => {
@@ -1120,6 +1182,108 @@ const AdminDashboard = () => {
                 <span className="hidden sm:inline text-gray-300 dark:text-gray-600">|</span>
                 <span>Total directory size: {dashboardMetrics.total}</span>
               </div>
+            </div>
+
+            <div className="rounded-3xl border border-white/60 bg-white/90 p-5 shadow-lg shadow-indigo-100/40 dark:border-[#243244] dark:bg-[#121a23] dark:shadow-black/20">
+              <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Import / Export</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Export the current directory or preview a CSV before importing contacts.
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button onClick={handleExportContacts} className="btn-secondary text-sm">
+                    Export CSV
+                  </button>
+                  <button
+                    onClick={() => setIsImportPanelOpen((prev) => !prev)}
+                    className="btn-primary text-sm"
+                  >
+                    {isImportPanelOpen ? 'Hide Import' : 'Show Import'}
+                  </button>
+                </div>
+              </div>
+
+              {isImportPanelOpen && (
+                <div className="mt-4 border-t border-gray-200 pt-4 dark:border-[#243244]">
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+                    <input
+                      type="file"
+                      accept=".csv"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] || null;
+                        setSelectedImportFile(file);
+                        setImportPreview(null);
+                      }}
+                      className="block w-full text-sm text-gray-600 dark:text-gray-300"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handlePreviewImport}
+                        disabled={importPreviewMutation.isPending || !selectedImportFile}
+                        className="btn-secondary text-sm disabled:opacity-50"
+                      >
+                        Preview Import
+                      </button>
+                      <button
+                        onClick={handleApplyImport}
+                        disabled={importPreviewMutation.isPending || !selectedImportFile}
+                        className="btn-primary text-sm disabled:opacity-50"
+                      >
+                        Apply Import
+                      </button>
+                    </div>
+                  </div>
+
+                  {importPreview && (
+                    <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[0.8fr_1.2fr]">
+                      <div className="rounded-2xl border border-gray-200 bg-gray-50/80 p-4 dark:border-[#253649] dark:bg-[#17212c]">
+                        <div className="text-sm font-semibold text-gray-900 dark:text-white">Import Summary</div>
+                        <div className="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                          <div>Total rows: {importPreview.total_rows}</div>
+                          <div>Valid rows: {importPreview.valid_rows}</div>
+                          <div>Created rows: {importPreview.created_count}</div>
+                          <div>Errors: {importPreview.errors?.length || 0}</div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                        <div className="rounded-2xl border border-gray-200 bg-gray-50/80 p-4 dark:border-[#253649] dark:bg-[#17212c]">
+                          <div className="mb-3 text-sm font-semibold text-gray-900 dark:text-white">Preview</div>
+                          <div className="max-h-56 space-y-2 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                            {(importPreview.preview || []).map((row) => (
+                              <div key={row.row} className="rounded-xl border border-gray-200 bg-white/80 p-3 text-sm dark:border-[#31465a] dark:bg-[#121a23]">
+                                <div className="font-medium text-gray-900 dark:text-white">{row.name}</div>
+                                <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                  {[row.department, row.designation, row.company].filter(Boolean).join(' • ') || 'No taxonomy fields'}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="rounded-2xl border border-gray-200 bg-gray-50/80 p-4 dark:border-[#253649] dark:bg-[#17212c]">
+                          <div className="mb-3 text-sm font-semibold text-gray-900 dark:text-white">Errors</div>
+                          <div className="max-h-56 space-y-2 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                            {(importPreview.errors || []).length > 0 ? (
+                              importPreview.errors.map((item, index) => (
+                                <div key={`${item.row}-${index}`} className="rounded-xl border border-red-200 bg-red-50/80 p-3 text-sm text-red-700 dark:border-red-900/30 dark:bg-red-900/20 dark:text-red-300">
+                                  Row {item.row}: {item.message}
+                                </div>
+                              ))
+                            ) : (
+                              <div className="rounded-xl border border-emerald-200 bg-emerald-50/80 p-3 text-sm text-emerald-700 dark:border-emerald-900/30 dark:bg-emerald-900/20 dark:text-emerald-300">
+                                No validation errors found.
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="hidden lg:block overflow-hidden rounded-3xl border border-white/60 bg-white/95 shadow-lg shadow-indigo-100/40 dark:border-[#243244] dark:bg-[#121a23] dark:shadow-black/20">

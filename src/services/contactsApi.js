@@ -72,6 +72,23 @@ export const bulkUpdateContacts = (contactIds, updates) => {
   });
 };
 
+export const exportContactsCsv = (params = {}) => {
+  return api.get('/api/admin/contacts/export', {
+    params,
+    responseType: 'blob',
+  });
+};
+
+export const importContactsCsv = (file, applyChanges = false) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return api.post(`/api/admin/contacts/import?apply_changes=${applyChanges}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
+
 /**
  * Toggle ERT status for a contact (admin only)
  * @param {string} id - Contact ID

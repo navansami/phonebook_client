@@ -174,10 +174,10 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn"
+      className="fixed inset-0 z-50 flex justify-end bg-black/45 backdrop-blur-sm"
       onClick={handleBackdropClick}
     >
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="h-full w-full max-w-2xl overflow-hidden border-l border-gray-200 bg-white shadow-2xl dark:border-[#243244] dark:bg-[#121a23] flex flex-col">
         {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-5 flex items-center justify-between z-10">
           <div className="flex items-center gap-3">

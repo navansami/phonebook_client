@@ -91,6 +91,12 @@ const AdminContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
 
   if (!isOpen) return null;
 
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget && !isLoading) {
+      onClose();
+    }
+  };
+
   const validateForm = () => {
     const newErrors = {};
 
@@ -187,14 +193,21 @@ const AdminContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
   return (
     <>
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn"
+        className="fixed inset-0 z-50 flex justify-end bg-black/45 backdrop-blur-sm"
+        onClick={handleBackdropClick}
       >
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="h-full w-full max-w-3xl overflow-hidden border-l border-gray-200 bg-white shadow-2xl dark:border-[#243244] dark:bg-[#121a23] flex flex-col">
           {/* Header */}
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 flex items-center justify-between text-white sticky top-0 z-10">
-            <h2 className="text-2xl font-bold">
-              {contact ? 'Edit Contact' : 'Add New Contact'}
-            </h2>
+          <div className="sticky top-0 z-10 border-b border-white/10 bg-gradient-to-r from-[#3f6ee8] via-[#5b4fe7] to-[#8c3ae8] px-6 py-5 text-white shadow-lg shadow-indigo-900/15">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="mb-1 text-xs font-semibold uppercase tracking-[0.28em] text-white/70">
+                  {contact ? 'Directory Update' : 'New Directory Entry'}
+                </p>
+                <h2 className="text-3xl font-bold leading-none">
+                  {contact ? 'Edit Contact' : 'Add Contact'}
+                </h2>
+              </div>
             <button
               onClick={onClose}
               disabled={isLoading}
@@ -203,56 +216,90 @@ const AdminContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
             >
               <X className="w-6 h-6" />
             </button>
+            </div>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
             <div className="px-6 py-6 space-y-6">
               {/* Profile Picture Section */}
-              <div className="flex flex-col items-center gap-4 p-6 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-900/40 dark:to-gray-800 rounded-xl border-2 border-indigo-100 dark:border-indigo-800">
-                <div className="relative">
-                  {formData.profile_picture ? (
-                    <div className="relative group">
-                      <img
-                        src={formData.profile_picture}
-                        alt="Profile"
-                        className="w-32 h-32 rounded-full object-cover border-4 border-white dark:border-gray-700 shadow-lg"
-                      />
+              <div className="rounded-3xl border border-indigo-100 bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.14),_transparent_32%),linear-gradient(135deg,#f8f8ff,#f3f6ff)] p-5 dark:border-[#2f4054] dark:bg-[radial-gradient(circle_at_top_left,_rgba(91,79,231,0.16),_transparent_30%),linear-gradient(135deg,#151e29,#17212d)]">
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+                  <div className="relative mx-auto sm:mx-0">
+                    {formData.profile_picture ? (
+                      <div className="relative group">
+                        <img
+                          src={formData.profile_picture}
+                          alt="Profile"
+                          className="h-28 w-28 rounded-[28px] object-cover border-4 border-white dark:border-[#243244] shadow-lg"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleRemoveProfilePicture}
+                          className="absolute -top-2 -right-2 rounded-full bg-red-500 p-1.5 text-white shadow-lg transition-colors hover:bg-red-600"
+                          title="Remove picture"
+                        >
+                          <XCircle className="w-5 h-5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex h-28 w-28 items-center justify-center rounded-[28px] border-4 border-white bg-gradient-to-br from-indigo-100 to-purple-100 shadow-lg dark:border-[#243244] dark:from-[#1e3042] dark:to-[#2d2a4d]">
+                        <User className="h-14 w-14 text-indigo-400 dark:text-indigo-300" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-indigo-500 dark:text-[#7fdcff]">
+                      Profile Media
+                    </p>
+                    <h3 className="mt-1 text-xl font-bold text-gray-900 dark:text-white">
+                      {formData.name || 'Contact profile'}
+                    </h3>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                      Add a photo to make records easier to scan in the admin table and contact drawer.
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-3">
                       <button
                         type="button"
-                        onClick={handleRemoveProfilePicture}
-                        className="absolute -top-2 -right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg"
-                        title="Remove picture"
+                        onClick={() => setIsCropModalOpen(true)}
+                        className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 font-medium text-indigo-700 shadow-sm ring-1 ring-indigo-200 transition-colors hover:bg-indigo-50 dark:bg-[#1b2734] dark:text-[#8edfff] dark:ring-[#35526b] dark:hover:bg-[#223142]"
                       >
-                        <XCircle className="w-5 h-5" />
+                        {formData.profile_picture ? (
+                          <>
+                            <ImageIcon className="w-4 h-4" />
+                            Change Picture
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-4 h-4" />
+                            Upload Picture
+                          </>
+                        )}
                       </button>
+                      {formData.profile_picture && (
+                        <button
+                          type="button"
+                          onClick={handleRemoveProfilePicture}
+                          className="inline-flex items-center gap-2 rounded-xl bg-white/80 px-4 py-2.5 font-medium text-red-600 shadow-sm ring-1 ring-red-200 transition-colors hover:bg-red-50 dark:bg-[#1b2734] dark:text-red-300 dark:ring-red-900/40 dark:hover:bg-red-900/20"
+                        >
+                          <XCircle className="w-4 h-4" />
+                          Remove
+                        </button>
+                      )}
                     </div>
-                  ) : (
-                    <div className="w-32 h-32 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/40 dark:to-purple-900/40 flex items-center justify-center border-4 border-white dark:border-gray-700 shadow-lg">
-                      <User className="w-16 h-16 text-indigo-400 dark:text-indigo-300" />
-                    </div>
-                  )}
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setIsCropModalOpen(true)}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-white dark:bg-gray-700 border-2 border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-600 transition-colors font-medium shadow-sm"
-                >
-                  {formData.profile_picture ? (
-                    <>
-                      <ImageIcon className="w-5 h-5" />
-                      Change Picture
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="w-5 h-5" />
-                      Upload Picture
-                    </>
-                  )}
-                </button>
               </div>
 
               {/* Basic Information */}
+              <div className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm dark:border-[#243244] dark:bg-[#151e29]">
+                <div className="mb-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-gray-400 dark:text-gray-500">
+                    Core Details
+                  </p>
+                  <h3 className="mt-1 text-xl font-bold text-gray-900 dark:text-white">Identity</h3>
+                </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
@@ -337,8 +384,16 @@ const AdminContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
                   />
                 </div>
               </div>
+              </div>
 
               {/* Contact Information */}
+              <div className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm dark:border-[#243244] dark:bg-[#151e29]">
+                <div className="mb-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-gray-400 dark:text-gray-500">
+                    Reachability
+                  </p>
+                  <h3 className="mt-1 text-xl font-bold text-gray-900 dark:text-white">Contact Channels</h3>
+                </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
@@ -413,8 +468,16 @@ const AdminContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
                   />
                 </div>
               </div>
+              </div>
 
               {/* Additional Information */}
+              <div className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm dark:border-[#243244] dark:bg-[#151e29]">
+                <div className="mb-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-gray-400 dark:text-gray-500">
+                    Classification
+                  </p>
+                  <h3 className="mt-1 text-xl font-bold text-gray-900 dark:text-white">Languages, Tags, Notes</h3>
+                </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="languages" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
@@ -467,12 +530,18 @@ const AdminContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
                   placeholder="Additional notes or information..."
                 />
               </div>
+              </div>
 
               {/* Status Toggles */}
-              <div className="space-y-3 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700">
-                <h3 className="font-semibold text-gray-700 dark:text-gray-200 mb-3">Status & Permissions</h3>
+              <div className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm dark:border-[#243244] dark:bg-[#151e29]">
+                <div className="mb-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-gray-400 dark:text-gray-500">
+                    Publishing Rules
+                  </p>
+                  <h3 className="mt-1 text-xl font-bold text-gray-900 dark:text-white">Status & Permissions</h3>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <label className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <label className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50/80 p-4 cursor-pointer transition-colors hover:bg-gray-100 dark:border-[#243244] dark:bg-[#1b2430] dark:hover:bg-[#202b38]">
                     <input
                       type="checkbox"
                       name="expose"
@@ -484,7 +553,7 @@ const AdminContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
                     <span className="font-medium text-gray-700 dark:text-gray-200">Publicly Visible</span>
                   </label>
 
-                  <label className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <label className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50/80 p-4 cursor-pointer transition-colors hover:bg-gray-100 dark:border-[#243244] dark:bg-[#1b2430] dark:hover:bg-[#202b38]">
                     <input
                       type="checkbox"
                       name="is_ert"
@@ -496,7 +565,7 @@ const AdminContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
                     <span className="font-medium text-gray-700 dark:text-gray-200">Emergency Response Team</span>
                   </label>
 
-                  <label className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <label className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50/80 p-4 cursor-pointer transition-colors hover:bg-gray-100 dark:border-[#243244] dark:bg-[#1b2430] dark:hover:bg-[#202b38]">
                     <input
                       type="checkbox"
                       name="is_ifa"
@@ -508,7 +577,7 @@ const AdminContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
                     <span className="font-medium text-gray-700 dark:text-gray-200">IFA Contact</span>
                   </label>
 
-                  <label className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <label className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50/80 p-4 cursor-pointer transition-colors hover:bg-gray-100 dark:border-[#243244] dark:bg-[#1b2430] dark:hover:bg-[#202b38]">
                     <input
                       type="checkbox"
                       name="is_third_party"
@@ -524,19 +593,19 @@ const AdminContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
             </div>
 
             {/* Footer Actions */}
-            <div className="sticky bottom-0 border-t border-gray-200 dark:border-gray-700 px-6 py-4 bg-gray-50 dark:bg-gray-800 flex flex-col-reverse sm:flex-row gap-3">
+            <div className="sticky bottom-0 border-t border-gray-200 bg-white/95 px-6 py-4 backdrop-blur dark:border-[#243244] dark:bg-[#121a23]/95 flex flex-col-reverse sm:flex-row gap-3">
               <button
                 type="button"
                 onClick={onClose}
                 disabled={isLoading}
-                className="w-full sm:w-auto px-6 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                className="w-full sm:w-auto rounded-xl border border-gray-300 px-6 py-3 font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#34485e] dark:text-gray-200 dark:hover:bg-[#1f2b38]"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full sm:flex-1 px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-medium shadow-lg"
+                className="w-full sm:flex-1 rounded-xl bg-gradient-to-r from-[#3f6ee8] via-[#5b4fe7] to-[#8c3ae8] px-6 py-3 text-white transition-all hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center gap-2 font-semibold shadow-lg shadow-indigo-900/20"
               >
                 {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
                 {isLoading ? 'Saving...' : (contact ? 'Update Contact' : 'Create Contact')}
