@@ -20,6 +20,7 @@ import ContactFormModal from '../components/ContactFormModal';
 import EmergencyModal from '../components/EmergencyModal';
 import LocationModal from '../components/LocationModal';
 import HelpModal from '../components/HelpModal';
+import QuickTipModal from '../components/QuickTipModal';
 import AccessCodeModal from '../components/AccessCodeModal';
 import Loader from '../components/Loader';
 
@@ -50,6 +51,7 @@ const HomePage = () => {
   const [isEmergencyModalOpen, setIsEmergencyModalOpen] = useState(false);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  const [isQuickTipModalOpen, setIsQuickTipModalOpen] = useState(false);
 
   // Debounce search query
   useEffect(() => {
@@ -68,13 +70,13 @@ const HomePage = () => {
     }
   }, []);
 
-  // Show help modal on first visit (only after access is verified)
+  // Show Quick Tip modal on first visit (only after access is verified)
   useEffect(() => {
     if (isAccessVerified) {
-      const hasSeenHelp = sessionStorage.getItem('hasSeenHelp');
-      if (!hasSeenHelp) {
-        setIsHelpModalOpen(true);
-        sessionStorage.setItem('hasSeenHelp', 'true');
+      const hasSeenQuickTip = sessionStorage.getItem('hasSeenQuickTip');
+      if (!hasSeenQuickTip) {
+        setIsQuickTipModalOpen(true);
+        sessionStorage.setItem('hasSeenQuickTip', 'true');
       }
     }
   }, [isAccessVerified]);
@@ -89,7 +91,8 @@ const HomePage = () => {
         !isFormModalOpen &&
         !isEmergencyModalOpen &&
         !isLocationModalOpen &&
-        !isHelpModalOpen
+        !isHelpModalOpen &&
+        !isQuickTipModalOpen
       ) {
         e.preventDefault();
         setIsSearchOverlayOpen(true);
@@ -110,6 +113,8 @@ const HomePage = () => {
           setIsLocationModalOpen(false);
         } else if (isHelpModalOpen) {
           setIsHelpModalOpen(false);
+        } else if (isQuickTipModalOpen) {
+          setIsQuickTipModalOpen(false);
         } else if (searchQuery) {
           setSearchQuery('');
         }
@@ -125,6 +130,7 @@ const HomePage = () => {
     isEmergencyModalOpen,
     isLocationModalOpen,
     isHelpModalOpen,
+    isQuickTipModalOpen,
     searchQuery,
   ]);
 
@@ -562,6 +568,9 @@ const HomePage = () => {
 
       {/* Help Modal */}
       <HelpModal isOpen={isHelpModalOpen} onClose={() => setIsHelpModalOpen(false)} />
+
+      {/* Quick Tip Modal */}
+      <QuickTipModal isOpen={isQuickTipModalOpen} onClose={() => setIsQuickTipModalOpen(false)} />
 
       {/* Access Code Modal */}
       <AccessCodeModal
