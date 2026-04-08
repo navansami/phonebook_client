@@ -331,13 +331,13 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
                       placeholder="Contact Name"
                     />
                   ) : (
-                    <h3 className="text-xl sm:text-2xl font-bold text-gray-900">{contact.name}</h3>
+                    <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{contact.name}</h3>
                   )}
                   {!isEditing && contact.designation && (
-                    <p className="text-purple-600 font-semibold text-base sm:text-lg mt-1">{contact.designation}</p>
+                    <p className="text-purple-600 dark:text-accent-300 font-semibold text-base sm:text-lg mt-1">{contact.designation}</p>
                   )}
                   {!isEditing && contact.department && (
-                    <p className="text-gray-500 text-sm mt-1">📍 {contact.department}</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">📍 {contact.department}</p>
                   )}
                 </div>
               </div>
