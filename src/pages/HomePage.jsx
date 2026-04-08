@@ -363,7 +363,7 @@ const HomePage = () => {
   }
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-gradient-to-br from-purple-50 via-white to-violet-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 transition-colors">
+    <div className="h-screen w-screen overflow-hidden bg-gradient-to-br from-purple-50 via-white to-violet-50 dark:from-[#151515] dark:via-[#1b1b1b] dark:to-[#242424] transition-colors">
       {/* Sidebar */}
       <Sidebar
         currentView={currentView}
@@ -519,7 +519,7 @@ const HomePage = () => {
               </div>
 
               {/* Pagination */}
-              <div className="sticky bottom-0 bg-gradient-to-t from-purple-50 via-purple-50 to-transparent dark:from-gray-900 dark:via-gray-900 pt-2 pb-4">
+              <div className="sticky bottom-0 bg-gradient-to-t from-purple-50 via-purple-50 to-transparent dark:from-[#151515] dark:via-[#1b1b1b] pt-2 pb-4">
                 <Pagination
                   currentPage={currentPage}
                   totalPages={totalPages}
