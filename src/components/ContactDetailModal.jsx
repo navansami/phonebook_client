@@ -307,7 +307,7 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
             {/* Left Column - Profile and Main Info (2/3 width) */}
             <div className="lg:col-span-2 space-y-6">
               {/* Profile Picture Section */}
-              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 bg-gradient-to-br from-purple-50 via-white to-violet-50 dark:from-slate-50 dark:via-white dark:to-purple-50 p-4 sm:p-6 rounded-2xl border-2 border-purple-200 dark:border-accent-700/50 shadow-lg dark:shadow-black/30">
+              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 bg-gradient-to-br from-purple-50 via-white to-violet-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-750 p-4 sm:p-6 rounded-2xl border-2 border-purple-200 dark:border-accent-700/50 shadow-lg dark:shadow-black/30">
                 <div className="relative flex-shrink-0">
                   <div className="w-32 h-32 sm:w-48 sm:h-48 rounded-2xl bg-gradient-to-br from-purple-400 via-violet-400 to-fuchsia-400 p-1 shadow-xl">
                     <div className="w-full h-full rounded-xl bg-white flex items-center justify-center overflow-hidden">
@@ -458,12 +458,12 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
             {/* Right Column - Tags & Comments (1/3 width) */}
             <div className="lg:col-span-1 space-y-6">
               {/* Tags Section */}
-              <div className="bg-white dark:bg-gray-50 rounded-2xl p-5 border-2 border-purple-200 dark:border-accent-700/50 shadow-lg h-fit">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border-2 border-purple-200 dark:border-accent-700/50 shadow-lg h-fit">
                 <div className="flex items-center gap-2 mb-4">
-                  <div className="p-2 bg-purple-100 dark:bg-accent-100 rounded-lg">
-                    <Tag className="w-5 h-5 text-purple-600" />
+                  <div className="p-2 bg-purple-100 dark:bg-accent-900/30 rounded-lg">
+                    <Tag className="w-5 h-5 text-purple-600 dark:text-accent-300" />
                   </div>
-                  <h3 className="text-sm font-bold text-purple-900 uppercase tracking-wide">Tags</h3>
+                  <h3 className="text-sm font-bold text-purple-900 dark:text-accent-300 uppercase tracking-wide">Tags</h3>
                 </div>
                 {isEditing ? (
                   <div className="space-y-3">
@@ -473,19 +473,19 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
                       onChange={(e) => setTagInput(e.target.value)}
                       onKeyDown={handleAddTag}
                       placeholder="Type a tag and press Enter..."
-                      className="w-full px-4 py-3 border-2 border-purple-200 dark:border-accent-700 bg-white dark:bg-gray-100 rounded-lg focus:border-purple-500 dark:focus:border-accent-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-accent-800/50 outline-none transition-all text-sm text-gray-900"
+                      className="w-full px-4 py-3 border-2 border-purple-200 dark:border-accent-700 bg-white dark:bg-gray-700 rounded-lg focus:border-purple-500 dark:focus:border-accent-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-accent-800/50 outline-none transition-all text-sm text-gray-900 dark:text-gray-100"
                     />
                     <div className="flex flex-wrap gap-2">
                       {editedContact.tags && editedContact.tags.length > 0 ? (
                         editedContact.tags.map((tag, index) => (
                           <span
                             key={index}
-                            className="group inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 dark:bg-accent-100 border border-purple-200 dark:border-accent-300 text-purple-700 dark:text-accent-800 rounded-full text-sm font-medium hover:bg-purple-200 dark:hover:bg-accent-200 transition-colors"
+                          className="group inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 dark:bg-gray-700 border border-purple-200 dark:border-gray-600 text-purple-700 dark:text-gray-100 rounded-full text-sm font-medium hover:bg-purple-200 dark:hover:bg-gray-600 transition-colors"
                           >
                             {tag}
                             <button
                               onClick={() => handleRemoveTag(tag)}
-                              className="hover:bg-purple-300 dark:hover:bg-accent-300 rounded-full p-0.5 transition-colors"
+                              className="hover:bg-purple-300 dark:hover:bg-gray-500 rounded-full p-0.5 transition-colors"
                               aria-label={`Remove ${tag}`}
                             >
                               <X className="w-3 h-3" />
@@ -503,7 +503,7 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
                       editedContact.tags.map((tag, index) => (
                         <span
                           key={index}
-                          className="px-3 py-1.5 bg-gray-100 border border-gray-200 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors"
+                          className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-100 rounded-full text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                         >
                           {tag}
                         </span>
@@ -516,12 +516,12 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
               </div>
 
               {/* Comments Section */}
-              <div className="bg-white dark:bg-gray-50 rounded-2xl p-5 border-2 border-purple-200 dark:border-accent-700/50 shadow-lg">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border-2 border-purple-200 dark:border-accent-700/50 shadow-lg">
                 <div className="flex items-center gap-2 mb-4">
-                  <div className="p-2 bg-purple-100 dark:bg-accent-100 rounded-lg">
-                    <MessageSquare className="w-5 h-5 text-purple-600" />
+                  <div className="p-2 bg-purple-100 dark:bg-accent-900/30 rounded-lg">
+                    <MessageSquare className="w-5 h-5 text-purple-600 dark:text-accent-300" />
                   </div>
-                  <h3 className="text-sm font-bold text-purple-900 uppercase tracking-wide">Comments</h3>
+                  <h3 className="text-sm font-bold text-purple-900 dark:text-accent-300 uppercase tracking-wide">Comments</h3>
                 </div>
                 {isEditing ? (
                   <textarea
@@ -529,11 +529,11 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
                     onChange={(e) => handleInputChange('comments', e.target.value)}
                     placeholder="Additional notes or comments..."
                     rows={6}
-                    className="w-full px-4 py-3 border-2 border-purple-200 dark:border-accent-700 bg-white dark:bg-gray-100 rounded-lg focus:border-purple-500 dark:focus:border-accent-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-accent-800/50 outline-none transition-all text-sm text-gray-900 resize-none"
+                    className="w-full px-4 py-3 border-2 border-purple-200 dark:border-accent-700 bg-white dark:bg-gray-700 rounded-lg focus:border-purple-500 dark:focus:border-accent-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-accent-800/50 outline-none transition-all text-sm text-gray-900 dark:text-gray-100 resize-none"
                   />
                 ) : (
-                  <div className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-50 dark:to-violet-50 rounded-lg p-4 border border-purple-100 min-h-[150px]">
-                    <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                  <div className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-gray-700 dark:to-gray-700 rounded-lg p-4 border border-purple-100 dark:border-gray-600 min-h-[150px]">
+                    <p className="text-sm text-gray-700 dark:text-gray-100 leading-relaxed whitespace-pre-wrap">
                       {editedContact.comments || <span className="text-gray-400 italic">No comments</span>}
                     </p>
                   </div>
