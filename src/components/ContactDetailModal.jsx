@@ -10,7 +10,7 @@ import axios from 'axios';
 // Move component definitions outside to prevent re-creation on every render
 const InputField = ({ icon: Icon, label, value, onChange, type = "text", placeholder, isEditing }) => (
   <div className="space-y-2">
-    <label className="flex items-center gap-2 text-sm font-semibold text-purple-700 uppercase tracking-wide">
+    <label className="flex items-center gap-2 text-sm font-semibold text-purple-700 dark:text-purple-400 uppercase tracking-wide">
       <Icon className="w-4 h-4" />
       {label}
     </label>
@@ -20,11 +20,11 @@ const InputField = ({ icon: Icon, label, value, onChange, type = "text", placeho
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-4 py-3 border-2 border-purple-200 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-gray-900"
+        className="w-full px-4 py-3 border-2 border-purple-200 dark:border-purple-700 bg-white dark:bg-gray-800 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 outline-none transition-all text-gray-900 dark:text-gray-100"
       />
     ) : (
-      <div className="px-4 py-3 bg-purple-50/50 rounded-lg border border-purple-100">
-        <p className="text-gray-900 font-medium">{value || '-'}</p>
+      <div className="px-4 py-3 bg-purple-50/50 dark:bg-purple-900/20 rounded-lg border border-purple-100 dark:border-purple-800">
+        <p className="text-gray-900 dark:text-gray-100 font-medium">{value || '-'}</p>
       </div>
     )}
   </div>
@@ -32,7 +32,7 @@ const InputField = ({ icon: Icon, label, value, onChange, type = "text", placeho
 
 const TextAreaField = ({ icon: Icon, label, value, onChange, placeholder, isEditing }) => (
   <div className="space-y-2">
-    <label className="flex items-center gap-2 text-sm font-semibold text-purple-700 uppercase tracking-wide">
+    <label className="flex items-center gap-2 text-sm font-semibold text-purple-700 dark:text-purple-400 uppercase tracking-wide">
       <Icon className="w-4 h-4" />
       {label}
     </label>
@@ -42,11 +42,11 @@ const TextAreaField = ({ icon: Icon, label, value, onChange, placeholder, isEdit
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={3}
-        className="w-full px-4 py-3 border-2 border-purple-200 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-gray-900 resize-none"
+        className="w-full px-4 py-3 border-2 border-purple-200 dark:border-purple-700 bg-white dark:bg-gray-800 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 outline-none transition-all text-gray-900 dark:text-gray-100 resize-none"
       />
     ) : (
-      <div className="px-4 py-3 bg-purple-50/50 rounded-lg border border-purple-100">
-        <p className="text-gray-900 whitespace-pre-wrap">{value || '-'}</p>
+      <div className="px-4 py-3 bg-purple-50/50 dark:bg-purple-900/20 rounded-lg border border-purple-100 dark:border-purple-800">
+        <p className="text-gray-900 dark:text-gray-100 whitespace-pre-wrap">{value || '-'}</p>
       </div>
     )}
   </div>
@@ -222,12 +222,12 @@ const ContactDetailModal = ({ contact, isOpen, onClose }) => {
       />
 
       {/* Slide Panel */}
-      <div className={`fixed top-0 right-0 z-50 h-full w-full md:w-1/2 bg-white shadow-2xl transition-transform duration-300 ease-out flex flex-col ${
+      <div className={`fixed top-0 right-0 z-50 h-full w-full md:w-1/2 bg-white dark:bg-gray-900 shadow-2xl transition-all duration-300 ease-out flex flex-col ${
         isClosing ? 'translate-x-full' : 'translate-x-0'
       }`}>
         {/* Decorative purple splash in corner */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-50/30 rounded-full blur-3xl -z-10" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-violet-50/20 rounded-full blur-3xl -z-10" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-50/30 dark:bg-purple-900/10 rounded-full blur-3xl -z-10" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-violet-50/20 dark:bg-violet-900/10 rounded-full blur-3xl -z-10" />
 
         {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-purple-600 via-violet-600 to-purple-600 px-6 py-5 shadow-lg z-10 flex-shrink-0">
