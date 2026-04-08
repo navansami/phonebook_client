@@ -341,13 +341,13 @@ const HomePage = () => {
   // Show error state
   if (contactsError) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-50 via-white to-violet-50">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-50 via-white to-violet-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
         <div className="text-center max-w-md">
-          <div className="bg-red-50 border border-red-200 rounded-xl p-6 mb-4">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">
+          <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl p-6 mb-4">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
               Error Loading Contacts
             </h2>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
               {contactsError.message || 'Something went wrong'}
             </p>
             <button
@@ -363,7 +363,7 @@ const HomePage = () => {
   }
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-gradient-to-br from-purple-50 via-white to-violet-50">
+    <div className="h-screen w-screen overflow-hidden bg-gradient-to-br from-purple-50 via-white to-violet-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 transition-colors">
       {/* Sidebar */}
       <Sidebar
         currentView={currentView}
@@ -391,7 +391,7 @@ const HomePage = () => {
             <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             {/* Results Count */}
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                 {currentView === 'all' && 'All Contacts'}
                 {currentView === 'emergency' && 'Emergency Response Team'}
                 {currentView === 'ifa' && 'IFA Contacts'}
@@ -481,10 +481,10 @@ const HomePage = () => {
           ) : filteredContacts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20">
               <div className="text-center card max-w-md p-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                   No contacts found
                 </h3>
-                <p className="text-sm text-gray-600 mb-6">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
                   {searchQuery
                     ? 'Try adjusting your search or filters'
                     : currentView === 'favorites'
@@ -519,7 +519,7 @@ const HomePage = () => {
               </div>
 
               {/* Pagination */}
-              <div className="sticky bottom-0 bg-gradient-to-t from-purple-50 via-purple-50 to-transparent pt-2 pb-4">
+              <div className="sticky bottom-0 bg-gradient-to-t from-purple-50 via-purple-50 to-transparent dark:from-gray-900 dark:via-gray-900 pt-2 pb-4">
                 <Pagination
                   currentPage={currentPage}
                   totalPages={totalPages}
