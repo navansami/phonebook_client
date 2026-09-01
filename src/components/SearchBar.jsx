@@ -40,7 +40,7 @@ const SearchBar = ({
   return (
     <div className="md:hidden w-full px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-colors">
       <div className="space-y-2">
-        <div className="flex flex-wrap gap-2">
+        <div className="ml-12 flex flex-wrap gap-2">
           {SEARCH_SCOPE_OPTIONS.map((option) => {
             const isActive = searchScope === option.value;
             return (

@@ -17,6 +17,7 @@ import ContactDetailModal from '../components/ContactDetailModal';
 import ContactFormModal from '../components/ContactFormModal';
 import EmergencyModal from '../components/EmergencyModal';
 import LocationModal from '../components/LocationModal';
+import FmcNetworkModal from '../components/FmcNetworkModal';
 import HelpModal from '../components/HelpModal';
 import QuickTipModal from '../components/QuickTipModal';
 import AccessCodeModal from '../components/AccessCodeModal';
@@ -37,7 +38,7 @@ const EMPTY_FILTERS = {
 };
 
 const HomePage = () => {
-  const { favorites, isFavorite } = useFavorites();
+  const { isFavorite } = useFavorites();
   const { isAuthenticated } = useAuth();
 
   // Access verification state
@@ -62,6 +63,7 @@ const HomePage = () => {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isEmergencyModalOpen, setIsEmergencyModalOpen] = useState(false);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [isFmcNetworkModalOpen, setIsFmcNetworkModalOpen] = useState(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
   const [isQuickTipModalOpen, setIsQuickTipModalOpen] = useState(false);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
@@ -104,6 +106,7 @@ const HomePage = () => {
         !isFormModalOpen &&
         !isEmergencyModalOpen &&
         !isLocationModalOpen &&
+        !isFmcNetworkModalOpen &&
         !isHelpModalOpen &&
         !isQuickTipModalOpen
       ) {
@@ -124,6 +127,8 @@ const HomePage = () => {
           setIsEmergencyModalOpen(false);
         } else if (isLocationModalOpen) {
           setIsLocationModalOpen(false);
+        } else if (isFmcNetworkModalOpen) {
+          setIsFmcNetworkModalOpen(false);
         } else if (isHelpModalOpen) {
           setIsHelpModalOpen(false);
         } else if (isQuickTipModalOpen) {
@@ -142,6 +147,7 @@ const HomePage = () => {
     isFormModalOpen,
     isEmergencyModalOpen,
     isLocationModalOpen,
+    isFmcNetworkModalOpen,
     isHelpModalOpen,
     isQuickTipModalOpen,
     searchQuery,
@@ -308,25 +314,45 @@ const HomePage = () => {
       }
       return 0;
     });
-
     const totalResults = filtered.length;
-    const groupedContacts = filtered.reduce((groups, currentContact) => {
-      const departmentName = currentContact.department || 'Other';
-      const existingGroup = groups.find((group) => group.department === departmentName);
+    let groupedContacts;
+    if (currentView === 'languages' || currentView === 'tags') {
+      const groupField = currentView === 'languages' ? 'languages' : 'tags';
+      const fallbackLabel = currentView === 'languages' ? 'No Language' : 'No Tag';
+      const groupsMap = new Map();
 
-      if (existingGroup) {
-        existingGroup.contacts.push(currentContact);
-      } else {
-        groups.push({
-          department: departmentName,
-          contacts: [currentContact],
+      filtered.forEach((currentContact) => {
+        const values = currentContact[groupField];
+        const groupKeys = Array.isArray(values) && values.length > 0 ? values : [fallbackLabel];
+
+        groupKeys.forEach((groupKey) => {
+          if (!groupsMap.has(groupKey)) {
+            groupsMap.set(groupKey, []);
+          }
+          groupsMap.get(groupKey).push(currentContact);
         });
-      }
+      });
 
-      return groups;
-    }, []);
+      groupedContacts = [...groupsMap.entries()].map(([name, contacts]) => ({ name, contacts }));
+    } else {
+      groupedContacts = filtered.reduce((groups, currentContact) => {
+        const departmentName = currentContact.department || 'Other';
+        const existingGroup = groups.find((group) => group.name === departmentName);
 
-    groupedContacts.sort((a, b) => a.department.localeCompare(b.department));
+        if (existingGroup) {
+          existingGroup.contacts.push(currentContact);
+        } else {
+          groups.push({
+            name: departmentName,
+            contacts: [currentContact],
+          });
+        }
+
+        return groups;
+      }, []);
+    }
+
+    groupedContacts.sort((a, b) => a.name.localeCompare(b.name));
     const totalPages = Math.ceil(totalResults / ITEMS_PER_PAGE) || 1;
 
     // Paginate
@@ -340,7 +366,7 @@ const HomePage = () => {
       totalPages,
       totalResults
     };
-  }, [allContactsData, currentView, debouncedSearchQuery, searchScope, selectedLetter, filters, sortBy, currentPage, isFavorite, favorites]);
+  }, [allContactsData, currentView, debouncedSearchQuery, searchScope, selectedLetter, filters, sortBy, currentPage, isFavorite]);
 
   const searchSuggestions = useMemo(() => {
     const contacts = allContactsData?.contacts || [];
@@ -399,7 +425,7 @@ const HomePage = () => {
         .map((contact) => (contact.name || '').trim().charAt(0).toUpperCase())
         .filter((letter) => /^[A-Z]$/.test(letter))
     )].sort();
-  }, [allContactsData, currentView, isFavorite, favorites]);
+  }, [allContactsData, currentView, isFavorite]);
 
   // Reset page when filters change
   useEffect(() => {
@@ -594,6 +620,7 @@ const HomePage = () => {
         setCurrentView={handleViewChange}
         onOpenLocation={() => setIsLocationModalOpen(true)}
         onOpenEmergency={() => setIsEmergencyModalOpen(true)}
+        onOpenFmcNetwork={() => setIsFmcNetworkModalOpen(true)}
       />
 
       {/* Main Content */}
@@ -634,7 +661,7 @@ const HomePage = () => {
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={() => setIsFilterDrawerOpen(true)}
                 className="btn-secondary flex items-center gap-2 text-sm"
@@ -693,30 +720,32 @@ const HomePage = () => {
             </div>
           </div>
 
-          <div className="mb-5 flex justify-start xl:pl-2">
-            <div className="inline-flex rounded-2xl bg-gray-100 p-1 shadow-sm dark:bg-[#10151b]">
-              <button
-                onClick={() => handleBrowseModeChange('cards')}
-                className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
-                  browseMode === 'cards'
-                    ? 'bg-white text-gray-900 shadow-sm dark:bg-[#1d2732] dark:text-white'
-                    : 'text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200'
-                }`}
-              >
-                Card View
-              </button>
-              <button
-                onClick={() => handleBrowseModeChange('grouped')}
-                className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
-                  browseMode === 'grouped'
-                    ? 'bg-white text-gray-900 shadow-sm dark:bg-[#1d2732] dark:text-white'
-                    : 'text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200'
-                }`}
-              >
-                Department View
-              </button>
+          {currentView !== 'languages' && currentView !== 'tags' && (
+            <div className="mb-5 flex justify-start xl:pl-2">
+              <div className="inline-flex rounded-2xl bg-gray-100 p-1 shadow-sm dark:bg-[#10151b]">
+                <button
+                  onClick={() => handleBrowseModeChange('cards')}
+                  className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
+                    browseMode === 'cards'
+                      ? 'bg-white text-gray-900 shadow-sm dark:bg-[#1d2732] dark:text-white'
+                      : 'text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200'
+                  }`}
+                >
+                  Card View
+                </button>
+                <button
+                  onClick={() => handleBrowseModeChange('grouped')}
+                  className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
+                    browseMode === 'grouped'
+                      ? 'bg-white text-gray-900 shadow-sm dark:bg-[#1d2732] dark:text-white'
+                      : 'text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200'
+                  }`}
+                >
+                  Department View
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           {activeFilterChips.length > 0 && (
             <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -790,13 +819,13 @@ const HomePage = () => {
                 )}
               </div>
             </div>
-          ) : browseMode === 'grouped' ? (
-            <div className="space-y-6 pr-12 md:pr-16 xl:pr-20">
+          ) : browseMode === 'grouped' || currentView === 'languages' || currentView === 'tags' ? (
+            <div className="space-y-6 md:pr-16 xl:pr-20">
               {groupedContacts.map((group) => (
-                <section key={group.department} className="rounded-3xl border border-gray-200 bg-white/75 p-4 shadow-sm dark:border-[#24303c] dark:bg-[#171d24]">
+                <section key={group.name} className="rounded-3xl border border-gray-200 bg-white/75 p-4 shadow-sm dark:border-[#24303c] dark:bg-[#171d24]">
                   <div className="mb-4 flex items-center justify-between gap-3 border-b border-gray-100 pb-3 dark:border-[#24303c]">
                     <div>
-                      <h2 className="text-xl font-bold text-gray-900 dark:text-white">{group.department}</h2>
+                      <h2 className="text-xl font-bold text-gray-900 dark:text-white">{group.name}</h2>
                       <p className="text-sm text-gray-500 dark:text-slate-400">
                         {group.contacts.length} contact{group.contacts.length === 1 ? '' : 's'}
                       </p>
@@ -817,7 +846,7 @@ const HomePage = () => {
             </div>
           ) : (
             <>
-              <div className="mb-4 grid grid-cols-1 gap-3 pr-12 sm:grid-cols-2 md:pr-16 lg:grid-cols-3 xl:grid-cols-4 xl:pr-20 2xl:grid-cols-4">
+              <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 md:pr-16 lg:grid-cols-3 xl:grid-cols-4 xl:pr-20 2xl:grid-cols-4">
                 {filteredContacts.map((contact) => (
                   <ContactCard
                     key={contact._id || contact.id}
@@ -912,6 +941,12 @@ const HomePage = () => {
       <LocationModal
         isOpen={isLocationModalOpen}
         onClose={() => setIsLocationModalOpen(false)}
+      />
+
+      {/* FMC Network Modal */}
+      <FmcNetworkModal
+        isOpen={isFmcNetworkModalOpen}
+        onClose={() => setIsFmcNetworkModalOpen(false)}
       />
 
       {/* Help Modal */}

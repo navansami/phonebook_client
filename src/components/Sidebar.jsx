@@ -10,13 +10,15 @@ import {
   X,
   Shield,
   Building2,
-  Building
+  Building,
+  Network
 } from 'lucide-react'
 import { useTheme } from '../contexts/ThemeContext'
 
 const Sidebar = ({
   currentView,
-  setCurrentView
+  setCurrentView,
+  onOpenFmcNetwork
 }) => {
   const { theme, toggleTheme } = useTheme()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -24,7 +26,7 @@ const Sidebar = ({
   const navigationItems = [
     { id: 'all', label: 'All Contacts', icon: Users },
     { id: 'emergency', label: 'Emergency', icon: Shield },
-    { id: 'ifa', label: 'IFA Hotels', icon: Building },
+    { id: 'ifa', label: 'Owners', icon: Building },
     { id: 'thirdparty', label: 'Third Party', icon: Building2 },
     { id: 'favorites', label: 'Favorites', icon: Star },
     { id: 'languages', label: 'Languages', icon: Languages },
@@ -79,6 +81,23 @@ const Sidebar = ({
           })}
         </div>
       </nav>
+
+      {/* Network Section */}
+      <div className="px-4 pb-4">
+        <h2 className="text-xs font-semibold text-gray-500 dark:text-[#6f8396] uppercase tracking-wider mb-3 px-2">
+          Network
+        </h2>
+        <div className="space-y-1">
+          <button
+            onClick={onOpenFmcNetwork}
+            className="sidebar-link"
+            aria-label="Open FMC Network"
+          >
+            <Network className="w-5 h-5 flex-shrink-0" />
+            <span>FMC Network</span>
+          </button>
+        </div>
+      </div>
 
       {/* Theme Toggle at Bottom */}
       <div className="p-4 border-t border-gray-200 dark:border-[#1b212a] transition-colors">

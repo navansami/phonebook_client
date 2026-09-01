@@ -241,12 +241,10 @@ const ContactFormModal = ({ isOpen, onClose, contact, onSubmit }) => {
         languages,
         tags,
       };
-
       await onSubmit(submitData);
-      toast.success(contact ? 'Contact updated successfully' : 'Contact added successfully');
       onClose();
     } catch (error) {
-      toast.error(error.message || 'Failed to save contact');
+      console.error('Failed to save contact:', error);
     } finally {
       setIsLoading(false);
     }

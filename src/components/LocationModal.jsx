@@ -2,13 +2,13 @@ import { useEffect } from 'react';
 import { X, Phone, Printer, MapPin, Globe, Mail, ExternalLink } from 'lucide-react';
 
 const hotelInfo = {
-  name: 'Hotel Name',
-  tel: '+971 4 XXX XXXX',
-  fax: '+971 4 XXX XXXX',
-  poBox: 'P.O. Box XXXXX, Dubai, UAE',
-  website: 'https://www.example.com',
-  email: 'info@example.com',
-  mapsUrl: 'https://maps.google.com/?q=Dubai+UAE'
+  name: 'Fairmont The Palm',
+  tel: '+971 4 457 3388',
+  fax: '+971 4 457 3399',
+  poBox: 'P.O. Box 72413, Palm Jumeirah, Dubai, UAE',
+  website: 'https://www.fairmont.com/palm-dubai/',
+  email: 'palmdubai@fairmont.com',
+  mapsUrl: 'https://maps.google.com/?q=Fairmont+The+Palm+Dubai'
 };
 
 const LocationModal = ({ isOpen, onClose }) => {
