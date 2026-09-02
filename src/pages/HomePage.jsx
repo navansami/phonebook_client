@@ -588,8 +588,8 @@ const HomePage = () => {
     return <Loader text="Loading contacts..." />;
   }
 
-  // Show error state
-  if (contactsError) {
+  // Show error state only when we have no data to fall back on (e.g. offline first visit)
+  if (contactsError && !allContactsData) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-50 via-white to-violet-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
         <div className="text-center max-w-md">

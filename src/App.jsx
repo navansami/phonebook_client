@@ -9,6 +9,7 @@ import AdminLayout from './layouts/AdminLayout'
 import HomePage from './pages/HomePage'
 import AdminDashboard from './pages/AdminDashboard'
 import Login from './pages/Login'
+import OfflineBanner from './components/OfflineBanner'
 import ProtectedRoute from './components/ProtectedRoute'
 
 const queryClient = new QueryClient({
@@ -43,6 +44,9 @@ function App() {
                 </Route>
               </Routes>
             </BrowserRouter>
+
+            {/* Offline Indicator */}
+            <OfflineBanner />
 
             {/* Toast Notifications */}
             <Toaster

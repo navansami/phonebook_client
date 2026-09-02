@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Star, Phone, Mail, MessageSquare, Sparkles, Edit2, User } from 'lucide-react';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -8,6 +8,7 @@ const ContactCard = ({ contact, onOpenDetail, onEdit }) => {
   const { isAuthenticated } = useAuth();
   const contactId = contact._id || contact.id;
   const isFav = isFavorite(contactId);
+  const [imageError, setImageError] = useState(false);
 
   const handleStarClick = (e) => {
     e.stopPropagation();
@@ -80,10 +81,11 @@ const ContactCard = ({ contact, onOpenDetail, onEdit }) => {
         <div className="flex items-start gap-3 mb-3">
           {/* Profile Picture */}
           <div className="flex-shrink-0">
-            {contact.profile_picture ? (
+            {contact.profile_picture && !imageError ? (
               <img
                 src={contact.profile_picture}
                 alt={contact.name}
+                onError={() => setImageError(true)}
                 className="w-14 h-14 rounded-full object-cover border-[3px] border-purple-200 dark:border-[#2d6584] shadow-md dark:shadow-[0_12px_24px_rgba(2,6,23,0.4)] group-hover:border-purple-400 dark:group-hover:border-[#53d1ff] transition-all"
               />
             ) : (

@@ -3,6 +3,8 @@ import axios from 'axios';
 // Create axios instance with base configuration
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '',
+  // Use the fetch adapter so requests go through the service worker (enables offline caching).
+  adapter: 'fetch',
 });
 
 // Request interceptor to add Authorization header
